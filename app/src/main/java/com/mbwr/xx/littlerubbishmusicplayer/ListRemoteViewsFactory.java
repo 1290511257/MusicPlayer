@@ -72,13 +72,14 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
      */
     private void initListViewData() {
         mDevices = new ArrayList<>();
-        mDevices.add(new Device("喜欢你哦", 0));
+//        mDevices.add(new Device("喜欢你哦", 0));
 //        mDevices.add(new Device("Oitsme", 1));
 //        mDevices.add(new Device("Hi", 0));
 //        mDevices.add(new Device("Hey", 1));
 //        mDevices = LitePal.findAll(Device.class);
 //        int temp = 0;
     }
+
     private static int i;
     public static void refresh(){
         i++;

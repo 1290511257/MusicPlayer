@@ -11,27 +11,50 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.util.Log;
 
+import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 
 public class MusicPlayerManager extends Service {
 
+    private MusicApp musicApp;
     private static PhoneStateListener phoneStateListener;
     private static MusicPlayerManager musicPlayerManager;
     private static MediaPlayer mediaPlayer;
 
     //是否暂停
-    private boolean ispause = false;
+    private boolean isPause = false;
     private int status = 1;//播放顺序: 1顺序循环 2随机循环 3单曲循环
     private int currentSong = -1;
-    private int lastposition = -1;
-    private Album album;
-    private String path;
-
+    private int lastPosition = -1;
+    private Album album;//歌单
+    private List<Song> songList;//歌曲播放列表
+    private String path;//当前歌曲路径
 
     private int msg;
+
     public static final String UPDATE_ACTION = "com.example.jinpeichen.musicplay.UPDATE_ACTION";  //更新动作
+
+
+    Handler handler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0:
+                    play(0);
+                    break;
+                case 1:resume();break;
+                case 2:
+                    pause();break;
+            }
+        }
+    };
 
     public MusicPlayerManager() {
     }
@@ -63,20 +86,56 @@ public class MusicPlayerManager extends Service {
     public void onCreate() {
         super.onCreate();
         mediaPlayer = new MediaPlayer();
+        path = getPath();
+        songList = album.getSongs();
+        musicApp = (MusicApp) this.getApplication();
 
-        path = album.getSongs().get(currentSong).getFilePath();
+        //设定音乐播放完成监听事件
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                int length = songList.size();
+                switch (status){
+                    case 1://顺序播放
+                        currentSong += 1;
+                        if(currentSong > length-1){
+                            currentSong = 0;
+                        }
+                        break;
+                    case 2://随机播放
+                        if (length > 1){
+                            int cx = new Random().nextInt(length);
+                            while (cx == currentSong){
+                                cx = new Random().nextInt(length);
+                            }
+                            lastPosition = currentSong;
+                            currentSong = cx;
+                        }
+                        break;
+                    case 3://单曲循环
+                        break;
+                }
+                path = getPath();
+                Intent in = new Intent(UPDATE_ACTION);
+                in.putExtra("from",0);
+                in.putExtra("curt",currentSong);//发送当前播放歌曲
+                sendBroadcast(in);
+                handler.sendEmptyMessage(0);
+            }
+        });
+
+
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         currentSong = intent.getIntExtra("position", -1);//播放位置
-        path = getPath(); // 歌曲路径
         msg = intent.getIntExtra("MSG", -1);
-
-        lastposition = currentSong - 1;
-        if(lastposition < 0){
-            lastposition = album.getSongs().size() - 1;
+        lastPosition = currentSong - 1;
+        if(lastPosition < 0){
+            lastPosition = songList.size() - 1;
         }
         switch (msg) {
             case 0:
@@ -103,25 +162,11 @@ public class MusicPlayerManager extends Service {
 
     @Override
     public void onDestroy() {
+        stop();
         super.onDestroy();
-
     }
 
-    Handler handler = new Handler(){
 
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 0:
-                    play(0);
-                    break;
-                case 1:resume();break;
-                case 2:
-                    pause();break;
-            }
-        }
-    };
 
     // begin play
     private void play (int curtTime){
@@ -141,14 +186,14 @@ public class MusicPlayerManager extends Service {
             if(mediaPlayer.isPlaying())
             {
                 mediaPlayer.pause();
-                ispause=true;
+                isPause =true;
             }
         }//
     }
 
     private void stop(){
-        if (mediaPlayer!=null){
-            ispause=false;
+        if (mediaPlayer != null){
+            isPause = false;
             mediaPlayer.pause();
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -156,9 +201,9 @@ public class MusicPlayerManager extends Service {
     }
 
     private void resume(){
-        if(ispause){
+        if(isPause){
             mediaPlayer.start();
-            ispause=false;
+            isPause =false;
         }
     }
 
@@ -193,8 +238,8 @@ public class MusicPlayerManager extends Service {
     }
 
     private String getPath(){
-        if(album!=null&&currentSong!=(-1)){
-            album.getSongs().get(currentSong).getFilePath();
+        if(album != null && currentSong != (-1)){
+            return songList.get(currentSong).getFilePath();
         }
         return null;
     }

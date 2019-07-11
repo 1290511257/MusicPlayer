@@ -19,4 +19,13 @@
     <string name="add_widget">Add widget</string>
     <string name="text_def">默认</string>
     <string name="text_self">自定义</string>
+
+    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">Music Player</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="title_activity_music_play">MusicPlayActivity</string>
 </resources>

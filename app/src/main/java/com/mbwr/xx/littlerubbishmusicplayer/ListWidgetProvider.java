@@ -48,19 +48,20 @@ public class ListWidgetProvider extends AppWidgetProvider implements SeekBar.OnS
         for (int appWidgetId : appWidgetIds) {
 
             // 获取AppWidget对应的视图
-            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget);
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
 
             // 设置响应 “按钮(bt_refresh)” 的intent
             Intent btIntent = new Intent().setAction(REFRESH_WIDGET);
             //在安卓8.1+中不支持广播静态注册，而动态注册需要启动应用程序，因此设定componment指定对指定包名进行广播，应该可以一定程度加快速度，减少消耗
             btIntent.setComponent(new ComponentName(context,com.mbwr.xx.littlerubbishmusicplayer.ListWidgetProvider.class));
+
             PendingIntent btPendingIntent = PendingIntent.getBroadcast(context, 0, btIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             remoteViews.setOnClickPendingIntent(R.id.tv_refresh, btPendingIntent);
 
 
 
-//            remoteViews.
+            // remoteViews.
             // 设置 “ListView” 的adapter。
             // (01) intent: 对应启动 ListWidgetService(RemoteViewsService) 的intent
             // (02) setRemoteAdapter: 设置 gridview的适配器
@@ -68,6 +69,7 @@ public class ListWidgetProvider extends AppWidgetProvider implements SeekBar.OnS
             //    以达到通过 ListWidgetService 更新 ListView的目的
             Intent serviceIntent = new Intent(context, ListWidgetService.class);
             //serviceIntent.setComponent(new ComponentName(context,com.example.xx.myapplication01.widget.ListWidgetProvider.class));
+
             remoteViews.setRemoteAdapter(R.id.lv_device, serviceIntent);
 
 
@@ -135,7 +137,7 @@ public class ListWidgetProvider extends AppWidgetProvider implements SeekBar.OnS
      *
      */
     private void showLoading(Context context) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         remoteViews.setViewVisibility(R.id.tv_refresh, View.VISIBLE);
         remoteViews.setViewVisibility(R.id.progress_bar, View.VISIBLE);
         remoteViews.setTextViewText(R.id.tv_refresh, "正在刷新...");
@@ -146,7 +148,7 @@ public class ListWidgetProvider extends AppWidgetProvider implements SeekBar.OnS
      * 隐藏加载loading
      */
     private void hideLoading(Context context) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         remoteViews.setViewVisibility(R.id.progress_bar, View.GONE);
         remoteViews.setTextViewText(R.id.tv_refresh, "刷新");
         refreshWidget(context, remoteViews, false);

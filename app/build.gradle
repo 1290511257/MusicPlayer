@@ -30,4 +30,5 @@ dependencies {
 
     /// add by xx 7.3
     implementation 'org.litepal.android:java:3.0.0'
+    implementation 'com.facebook.fresco:fresco:0.12.0'
 }

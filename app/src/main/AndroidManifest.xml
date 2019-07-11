@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mbwr.xx.littlerubbishmusicplayer">
+    <!-- 写文件权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 读文件权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 电话监听权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".MusicApp"
@@ -10,33 +14,37 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <!--Activity-->
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activity.WelcomeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_welcome"
+            android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".activity.seekbar">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-
-
-        <!--Service-->
+        <activity android:name=".activity.PlayingActivity"/>
+        <activity android:name=".activity.MusicPlayActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity> <!-- Service -->
         <service android:name=".service.PhoneListenerService">
             <intent-filter>
-                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE"/>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
             </intent-filter>
         </service>
-
+        <service android:name=".service.MusicPlayerManager" />
         <service
             android:name=".ListWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
@@ -47,19 +55,15 @@
                 <!-- ListWidgetProvider接收点击ListView的响应事件 -->
                 <action android:name="com.zhpan.COLLECTION_VIEW_ACTION" />
                 <!-- ListWidgetProvider接收点击bt_refresh的响应事件 -->
-                <!--<action android:name="com.zhpan.REFRESH_WIDGET" />-->
+                <!-- <action android:name="com.zhpan.REFRESH_WIDGET" /> -->
                 <action android:name="com.zhpan.LOCK_ACTION" />
                 <action android:name="com.zhpan.UNLOCK_ACTION" />
             </intent-filter>
+
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_provider" />
         </receiver>
-
     </application>
-
-
-
-
 
 </manifest>

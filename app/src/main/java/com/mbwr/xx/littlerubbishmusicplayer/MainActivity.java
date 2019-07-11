@@ -1,12 +1,8 @@
 package com.mbwr.xx.littlerubbishmusicplayer;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
+import android.util.Log;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
@@ -17,14 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
-import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Device;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayingActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
 
 import org.litepal.LitePal;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -35,14 +28,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -50,12 +35,14 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        //Test Code
+        //初始化Litepal
         LitePal.initialize(this);
 
-        //phoneListener
+        //phoneListenerService启动
         Intent intent = new Intent(this, PhoneListenerService.class);
         startService(intent);
+
+
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -110,13 +97,14 @@ public class MainActivity extends AppCompatActivity
 //
 //            device.save();
 
-            Intent intent = new Intent(this,com.mbwr.xx.littlerubbishmusicplayer.activity.seekbar.class);
+            Intent intent = new Intent(this, PlayingActivity.class);
 
             startActivity(intent);
             int o = 0;
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
-
+            Intent intent = new Intent(this, MusicPlayActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_tools) {
@@ -131,4 +119,19 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    //应用程序被系统中断时调用此方法
+    @Override
+    protected void onPause() {
+        Log.i("tag","0000");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop(){
+        Log.i("tag","1111");
+        super.onStop();
+    }
+
+
 }
