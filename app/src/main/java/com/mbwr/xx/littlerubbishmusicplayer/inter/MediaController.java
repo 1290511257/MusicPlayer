@@ -1,17 +1,28 @@
 package com.mbwr.xx.littlerubbishmusicplayer.inter;
 
+import android.content.Intent;
+
+import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
+
 public interface MediaController {
 
-    void stop();
+    void CallStop();
 
-    void pause();
+    void CallPause();
 
-    void play ();
+    void CallPlay();
 
-    void resume();
+    void CallPlay(int position);
 
-    void lastMusic();
+    void CallResume();
 
-    void nextMusic();
+    void CallLastMusic();
 
+    void CallNextMusic();
+
+    void UpdateSeekBar(int position);
+
+    void UpdateAlbum(Album album);
+
+    void UpdatePlayMode(int i);
 }

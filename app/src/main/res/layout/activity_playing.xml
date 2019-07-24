@@ -242,10 +242,10 @@
                 <ImageView
                     android:id="@+id/playing_mode"
                     android:layout_width="wrap_content"
-                    android:layout_height="3dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:src="@drawable/play_icn_loop_prs" />
+                    android:src="@drawable/play_icn_loop" />
 
                 <ImageView
                     android:id="@+id/playing_pre"
@@ -277,7 +277,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:src="@drawable/play_icn_src_prs" />
+                    android:src="@drawable/list_icn_mng" />
 
             </LinearLayout>
         </LinearLayout>

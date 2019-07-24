@@ -14,7 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
 import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
-import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayingActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
 
 import org.litepal.LitePal;
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
 //
 //            device.save();
 
-            Intent intent = new Intent(this, PlayingActivity.class);
+            Intent intent = new Intent(this, PlayActivity.class);
 
             startActivity(intent);
             int o = 0;
