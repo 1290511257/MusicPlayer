@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
@@ -20,9 +19,6 @@ import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
-import com.mbwr.xx.littlerubbishmusicplayer.utils.HandlerUtil;
-import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
-import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +44,7 @@ public class MusicPlayerManager extends Service {
 
     //是否暂停
     private boolean isPause = true;
-    private int status = 1;//播放顺序: 1顺序循环 2随机循环 3单曲循环
+    private int playMode = 1;//播放顺序: 1顺序循环 2随机循环 3单曲循环
 
     private int currentSong = -1;
     private int lastPosition = -1;
@@ -56,7 +52,9 @@ public class MusicPlayerManager extends Service {
     private String TAG = MusicPlayerManager.class.getSimpleName();
 
     //广播
-    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新动作
+    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
+    public static final String UPDATE_PROGRESS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
+    public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
     public static final String NEXT_MUSIC = "com.mbwr.xx.NEXT_MUSIC";
     public static final String LAST_MUSIC = "com.mbwr.xx.LAST_MUSIC";
     public static final String PLAY_MUSIC = "com.mbwr.xx.PLAY_MUSIC";
@@ -122,7 +120,7 @@ public class MusicPlayerManager extends Service {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.i(TAG, "音乐播放完成.");
-                if (status != 3) {//单曲循环时继续当前歌曲
+                if (playMode != 3) {//单曲循环时继续当前歌曲
                     nextMusic();
                 }
             }
@@ -201,7 +199,7 @@ public class MusicPlayerManager extends Service {
         }
 
         int length = songList.size();
-        switch (status) {
+        switch (playMode) {
             case 1://顺序播放
                 currentSong += 1;
                 if (currentSong > length - 1) {
@@ -239,9 +237,9 @@ public class MusicPlayerManager extends Service {
     }
 
     /**
-     *  @author xuxiong
-     *  @time 7/26/19  4:07 AM
-     *  @describe 更新歌曲基本信息显示
+     * @author xuxiong
+     * @time 7/26/19  4:07 AM
+     * @describe 更新歌曲基本信息显示
      */
     private void updateSongInfo() {
 
@@ -257,6 +255,7 @@ public class MusicPlayerManager extends Service {
         bundle.putInt("currentPosition", currentPosition);
         bundle.putInt("duration", duration);
         bundle.putBoolean("mediaStatu", isPause);
+        bundle.putInt("playMode", playMode);
         msg.setData(bundle);
         PlayActivity.playHandler.sendMessage(msg);
 
@@ -275,7 +274,20 @@ public class MusicPlayerManager extends Service {
     private void updatePlayTime(int progress) {
         mediaPlayer.seekTo(progress);
     }
+    /**
+     *  @author xuxiong
+     *  @time 7/26/19  4:55 AM
+     *  @describe 更新界面播放模式和播放状态
+     */
+    private void updatePlayModeOrPlayStatus(){
 
+    }
+
+    /**
+     * @author xuxiong
+     * @time 7/26/19  4:25 AM
+     * @describe 更新Progress任务
+     */
     private void startTimeTask() {
         //使用Timer 定时器去定时获取当前进度
         timer = new Timer();
@@ -285,19 +297,26 @@ public class MusicPlayerManager extends Service {
             public void run() {
                 int currentPosition = mediaPlayer.getCurrentPosition();
                 Log.i(TAG, "歌曲正在播放,播放进度:" + currentPosition);
+
+                //Hander
                 Message msg = Message.obtain();
                 msg.what = 1;
                 Bundle bundle = new Bundle(); //map
                 bundle.putInt("currentPosition", currentPosition);
                 msg.setData(bundle);
-                //发送一条消息  PlayActivity里面的handlemessage方法就会执行
                 PlayActivity.playHandler.sendMessage(msg);
+
+                //BoardCast
+                Intent intent = new Intent(UPDATE_PROGRESS);
+                Bundle bd = new Bundle();
+                bd.putInt("currentPosition", currentPosition);
+                intent.putExtras(bd);
+                sendBroadcast(intent);
             }
         };
         //0 毫秒后 每隔1秒执行一次run方法
         timer.schedule(task, 0, 250);
     }
-
 
     //实际使用中有时不会正常停止
     private void stopTimeTask() {
@@ -384,7 +403,7 @@ public class MusicPlayerManager extends Service {
 
         @Override
         public void UpdatePlayMode(int i) {
-            status = i;
+            playMode = i;
         }
 
         @Override
