@@ -10,14 +10,13 @@ import android.util.Log;
 
 public class PhoneListenerService extends Service {
 
-    private static String TAG = "==============";
+    private static String TAG = PhoneListenerService.class.getCanonicalName();
     private TelephonyManager telephonyManager;
-
     private PhoneListener phoneListener;
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i(TAG,"onbind");
+        Log.i(TAG, "onbind");
         return null;
     }
 
@@ -31,15 +30,10 @@ public class PhoneListenerService extends Service {
     //Service被启动时调用
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(TAG, "电话监听Service启动!");
-
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
         phoneListener = new PhoneListener();
-
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -47,7 +41,7 @@ public class PhoneListenerService extends Service {
     @Override
     public void onDestroy() {
         Log.i(TAG, "电话监听Service关闭!");
-        if(telephonyManager != null && phoneListener != null){
+        if (telephonyManager != null && phoneListener != null) {
             //取消电话监听状态
             telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_NONE);
         }

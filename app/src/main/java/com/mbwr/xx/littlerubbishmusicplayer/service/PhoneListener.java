@@ -6,16 +6,13 @@ import android.util.Log;
 
 public class PhoneListener extends PhoneStateListener {
 
-    private static final String TAG = "PhoneListener";
-
+    private static final String TAG = PhoneListener.class.getSimpleName();
     //当电话状态发生改变时回调此方法
     @Override
     public void onCallStateChanged(int state, String phoneNumber) {
         super.onCallStateChanged(state, phoneNumber);
         try {
-
             switch (state){
-
                 case TelephonyManager.CALL_STATE_IDLE: //无任何状态时
                     Log.i(TAG,"CALL_STATE_IDLE");
 
@@ -25,13 +22,12 @@ public class PhoneListener extends PhoneStateListener {
 
                     break;
                 case TelephonyManager.CALL_STATE_RINGING://响铃
-
                     Log.i(TAG,"CALL_STATE_RINGING");
+                    MusicPlayerManager.getInstance().pause();
                     break;
             }
-
         }catch (Exception e){
-            //Log.i("Err", e.toString());
+            Log.i("Exception", e.toString());
         }
     }
 }

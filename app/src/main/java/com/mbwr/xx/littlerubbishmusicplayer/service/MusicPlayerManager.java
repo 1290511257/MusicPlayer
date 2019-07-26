@@ -4,21 +4,28 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.HandlerUtil;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -30,32 +37,36 @@ public class MusicPlayerManager extends Service {
     private static PhoneStateListener phoneStateListener;
     private static MusicPlayerManager musicPlayerManager;
     private static MediaPlayer mediaPlayer;
+    private static MusicReceiver musicReceiver;
+    private static Timer timer;
+    private static TimerTask task;
+    private int msg;
+
+    private Album album;//歌单
+    private List<Song> songList;//歌曲播放列表
+    private String path = "/storage/emulated/0/Music/蔡健雅+-+紫.mp3";//当前歌曲路径
 
     //是否暂停
-    private boolean isPause = false;
+    private boolean isPause = true;
     private int status = 1;//播放顺序: 1顺序循环 2随机循环 3单曲循环
 
     private int currentSong = -1;
     private int lastPosition = -1;
 
-    private Album album;//歌单
-    private List<Song> songList;//歌曲播放列表
-    private String path;//当前歌曲路径
-
-    private Timer timer;
-    private TimerTask task;
-
-    private int msg;
-
     private String TAG = MusicPlayerManager.class.getSimpleName();
 
-    public static final String UPDATE_ACTION = "com.mbwr.xx.littlerubbishmusicplayer.service.UPDATE_ACTION";  //更新动作
+    //广播
+    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新动作
+    public static final String NEXT_MUSIC = "com.mbwr.xx.NEXT_MUSIC";
+    public static final String LAST_MUSIC = "com.mbwr.xx.LAST_MUSIC";
+    public static final String PLAY_MUSIC = "com.mbwr.xx.PLAY_MUSIC";
+
 
     public MusicPlayerManager() {
+
     }
 
     public static MusicPlayerManager getInstance() {
-
         try {
             if (null == musicPlayerManager) {
                 synchronized (MusicPlayerManager.class) {
@@ -82,103 +93,92 @@ public class MusicPlayerManager extends Service {
     public void onCreate() {
         super.onCreate();
         mediaPlayer = new MediaPlayer();
-        path = getPath();
-//        songList = album.getSongs();
         musicApp = (MusicApp) this.getApplication();
 
+        //监听广播注册
+        musicReceiver = new MusicReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(NEXT_MUSIC);
+        intentFilter.addAction(LAST_MUSIC);
+        intentFilter.addAction(PLAY_MUSIC);
+        registerReceiver(musicReceiver, intentFilter);
+
+
+        songList = new ArrayList<>();
+        Song song = new Song("歌曲名", "歌手名", album, "/storage/emulated/0/Music/蔡健雅+-+紫.mp3", "/storage/emulated/0/Music/蔡健雅+-+紫.mp3");
+        songList.add(song);
+        currentSong = 0;
+        lastPosition = 0;
+
+        //测试数据
+        album = new Album();
+        album.setName("陈奕迅专辑.");
+        album.setSongs(songList);
+
+        InitPlayMusic();
         //设定音乐播放完成监听事件
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-
+                Log.i(TAG, "音乐播放完成.");
+                if (status != 3) {//单曲循环时继续当前歌曲
+                    nextMusic();
+                }
             }
         });
-
-
+        Log.i(TAG, "onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(TAG, "onStartCommand运行.");
-        currentSong = intent.getIntExtra("position", -1);//播放位置
-        msg = intent.getIntExtra("MSG", -1);
-        lastPosition = currentSong - 1;
-        if (lastPosition < 0) {
-            lastPosition = songList.size() - 1;
-        }
-
-        switch (msg) {
-            case 0:
-                play();
-                break;
-            case 1://暂停播放
-                pause();
-                break;
-            case 2://停止播放
-                stop();
-                break;
-            case 3://继续播放
-                resume();
-                break;
-            case 4:
-                lastMusic();
-                break;
-            case 5:
-                nextMusic();
-                break;
-        }
+        //每次start service都会运行此方法
+        updateSongInfo();
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         stop();
+        if (musicReceiver != null) {
+            unregisterReceiver(musicReceiver);
+        }
         super.onDestroy();
     }
 
     //播放音乐
     private void play() {
         mediaPlayer.start();
-        //使用Timer 定时器去定时获取当前进度
-        //当歌曲暂停的时候,该task也会一直执行,待优化
-        timer = new Timer();
-        task = new TimerTask() {
-
-            @Override
-            public void run() {
-                int currentPosition = mediaPlayer.getCurrentPosition();
-                Message msg = Message.obtain();
-                Bundle bundle = new Bundle(); //map
-                bundle.putInt("currentPosition", currentPosition);
-                msg.setData(bundle);
-                //发送一条消息  PlayActivity里面的handlemessage方法就会执行
-                PlayActivity.handler.sendMessage(msg);
-            }
-        };
-        //100 毫秒后 每隔1秒执行一次run方法
-        timer.schedule(task, 100, 1000);
+        isPause = false;
+        startTimeTask();
+        Log.i(TAG, "Play StartTimeTask");
     }
 
-    private void pause() {
+    //暂停播放
+    public void pause() {
         if (mediaPlayer != null) {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 isPause = true;
+                stopTimeTask();
+                Log.i(TAG, "Pause StopTimeTask");
             }
-        }//
-    }
-
-    private void stop() {
-        if (mediaPlayer != null) {
-            isPause = false;
-            mediaPlayer.pause();
-            mediaPlayer.stop();
-            mediaPlayer.release();
         }
     }
 
+    //停止播放
+    private void stop() {
+        if (mediaPlayer != null) {
+            isPause = true;
+            mediaPlayer.pause();
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            stopTimeTask();
+        }
+    }
+
+    //继续播放
     private void resume() {
         if (isPause) {
             play();
@@ -186,6 +186,7 @@ public class MusicPlayerManager extends Service {
         }
     }
 
+    //上一首歌曲
     private void lastMusic() {
         if (currentSong > -1) {
             path = getPath(); // 歌曲路径
@@ -194,6 +195,11 @@ public class MusicPlayerManager extends Service {
 
     //下一首歌曲
     private void nextMusic() {
+        if (songList == null) {
+            Toast.makeText(this, "没有可播放的音乐!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         int length = songList.size();
         switch (status) {
             case 1://顺序播放
@@ -212,18 +218,19 @@ public class MusicPlayerManager extends Service {
                     currentSong = cx;
                 }
                 break;
-            case 3://单曲循环
+            case 3:
+                currentSong += 1;
+                if (currentSong > length - 1) {
+                    currentSong = 0;
+                }
                 break;
         }
         path = getPath();
 
-        Intent intent = new Intent(UPDATE_ACTION);
-        intent.putExtra("from", 0);
-        intent.putExtra("curt", currentSong);//发送当前播放歌曲
-        sendBroadcast(intent);
-
         InitPlayMusic();
         play();
+
+
     }
 
     //更新播放歌单
@@ -231,22 +238,91 @@ public class MusicPlayerManager extends Service {
 
     }
 
+    /**
+     *  @author xuxiong
+     *  @time 7/26/19  4:07 AM
+     *  @describe 更新歌曲基本信息显示
+     */
+    private void updateSongInfo() {
+
+        Song song = songList.get(currentSong);
+        int duration = mediaPlayer.getDuration();
+        int currentPosition = mediaPlayer.getCurrentPosition();
+
+        //Hander
+        Message msg = Message.obtain();
+        Bundle bundle = new Bundle(); //map
+        bundle.putString("songName", song.getName());
+        bundle.putString("singer", song.getSinger());
+        bundle.putInt("currentPosition", currentPosition);
+        bundle.putInt("duration", duration);
+        bundle.putBoolean("mediaStatu", isPause);
+        msg.setData(bundle);
+        PlayActivity.playHandler.sendMessage(msg);
+
+        //BoardCast
+        Intent intent = new Intent(UPDATE_MUSIC_INFO);
+        Bundle bd = new Bundle();
+        bd.putString("songName", song.getName());
+        bd.putString("singer", song.getSinger());
+        bd.putInt("currentPosition", currentPosition);
+        bd.putInt("duration", duration);
+        bd.putBoolean("mediaStatu", isPause);
+        intent.putExtras(bd);
+        sendBroadcast(intent);
+    }
+
+    private void updatePlayTime(int progress) {
+        mediaPlayer.seekTo(progress);
+    }
+
+    private void startTimeTask() {
+        //使用Timer 定时器去定时获取当前进度
+        timer = new Timer();
+        task = new TimerTask() {
+
+            @Override
+            public void run() {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                Log.i(TAG, "歌曲正在播放,播放进度:" + currentPosition);
+                Message msg = Message.obtain();
+                msg.what = 1;
+                Bundle bundle = new Bundle(); //map
+                bundle.putInt("currentPosition", currentPosition);
+                msg.setData(bundle);
+                //发送一条消息  PlayActivity里面的handlemessage方法就会执行
+                PlayActivity.playHandler.sendMessage(msg);
+            }
+        };
+        //0 毫秒后 每隔1秒执行一次run方法
+        timer.schedule(task, 0, 250);
+    }
+
+
+    //实际使用中有时不会正常停止
+    private void stopTimeTask() {
+        if (task != null && timer != null) {
+            task.cancel();
+            timer.cancel();
+        }
+    }
+
     //接受广播消息
     public class MusicReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int control = intent.getIntExtra("control", -1);
-            //Toast.makeText(getApplicationContext(),""+control,Toast.LENGTH_SHORT).show();
-            switch (control) {
-                case 1:
-                    status = 1;
+            String action = intent.getAction();
+            Log.i("MusicReceiver", "onReceiver,action" + action);
+            switch (action) {
+                case LAST_MUSIC:
+                    lastMusic();
                     break;
-                case 2:
-                    status = 2;
+                case PLAY_MUSIC:
+                    play();
                     break;
-                case 3:
-                    status = 3;
+                case NEXT_MUSIC:
+                    nextMusic();
                     break;
             }
         }
@@ -294,7 +370,8 @@ public class MusicPlayerManager extends Service {
         }
 
         @Override
-        public void UpdateSeekBar(int position) {
+        public void UpdatePlayTime(int position) {
+            updatePlayTime(position);
         }
 
         //更新歌单
@@ -303,20 +380,36 @@ public class MusicPlayerManager extends Service {
             album = t_album;
             songList = album.getSongs();
 
-
         }
 
         @Override
         public void UpdatePlayMode(int i) {
             status = i;
         }
+
+        @Override
+        public void StartTimeTask() {
+            startTimeTask();
+        }
+
+        @Override
+        public void StopTimeTask() {
+            stopTimeTask();
+        }
+
+        @Override
+        public void UpdateSongInfo() {
+        }
     }
 
-    //音乐信息初始化
+    //歌曲初始化
     private void InitPlayMusic() {
 
+        if (songList == null) {
+            Toast.makeText(this, "请选择要播放的音乐!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Song song = songList.get(currentSong);
-
         mediaPlayer.reset();//恢复初始化
         try {
             mediaPlayer.setDataSource(song.getFilePath());
@@ -324,17 +417,8 @@ public class MusicPlayerManager extends Service {
         } catch (IOException e) {
             Log.i(TAG, e.toString());
         }
-        mediaPlayer.getTimestamp();
-        int duration = mediaPlayer.getDuration();
-
-        Message msg = Message.obtain();
-        Bundle bundle = new Bundle(); //map
-        bundle.putString("songName", song.getName());
-        bundle.putString("singer", song.getSinger());
-        bundle.putInt("duration", duration);
-        msg.setData(bundle);
-        PlayActivity.handler.sendMessage(msg);
-
+//        mediaPlayer.getTimestamp();
+        updateSongInfo();
     }
 
     private String getPath() {

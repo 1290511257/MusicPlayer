@@ -1,7 +1,10 @@
 package com.mbwr.xx.littlerubbishmusicplayer;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +24,12 @@ import org.litepal.LitePal;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    //请求储存卡权限
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +51,12 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, PhoneListenerService.class);
         startService(intent);
 
+        //请求储存卡权限
+        verifyStoragePermissions(this);
 
+        //打开播放界面
+        Intent intent1 = new Intent(this, PlayActivity.class);
+        startActivity(intent1);
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -86,22 +100,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-
-            //SQLiteDatabase db = LitePal.getDatabase();
-
-            //List<Song> allSongs = LitePal.findAll(Song.class);
-
-            //List<Device> device = LitePal.findAll(Device.class);
-
-//            Device device = new Device("喜欢你", 0);
-//
-//            device.save();
-
-            Intent intent = new Intent(this, PlayActivity.class);
-
-            startActivity(intent);
-            int o = 0;
-            // Handle the camera action
+            sendBroadcast(new Intent("com.mbwr.xx.PLAY_MUSIC"));
         } else if (id == R.id.nav_gallery) {
             Intent intent = new Intent(this, MusicPlayActivity.class);
             startActivity(intent);
@@ -120,18 +119,34 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    //应用程序被系统中断时调用此方法
+    //应用程序被系统中断时调用此方法,当应用被任何系统服务中断时均会调用此方法.
+    //缺点是无法针对具体的占用作出反应
     @Override
     protected void onPause() {
-        Log.i("tag","0000");
         super.onPause();
     }
 
     @Override
     protected void onStop(){
-        Log.i("tag","1111");
         super.onStop();
     }
 
+
+    //请求储存卡权限读取
+    public static void verifyStoragePermissions(Activity activity) {
+
+        try {
+            //检测是否有写的权限
+            int permission = ActivityCompat.checkSelfPermission(activity,
+                    "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有写的权限，去申请写的权限，会弹出对话框
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }

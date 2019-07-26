@@ -36,6 +36,33 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@mipmap/last" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="50dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/songname"
+                    android:layout_width="match_parent"
+                    android:layout_height="27dp"
+                    android:text="K歌之王-Live"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:id="@+id/singername"
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:text="Eason"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="15sp"/>
+            </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout
@@ -54,8 +81,8 @@
                 <ImageView
                     android:layout_width="263dp"
                     android:layout_height="263dp"
-                    android:layout_marginTop="60dp"
                     android:layout_centerHorizontal="true"
+                    android:layout_marginTop="60dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/play_disc_halo" />
 
@@ -70,10 +97,10 @@
                     android:id="@+id/needle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
                     android:layout_below="@+id/view_line"
-                    android:layout_marginRight="100dp"
+                    android:layout_alignParentRight="true"
                     android:layout_marginTop="-16dp"
+                    android:layout_marginRight="125dp"
                     android:rotation="-30"
                     android:src="@drawable/play_needle"
                     android:transformPivotX="15.1dp"
@@ -153,8 +180,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="70dp"
-                android:layout_marginRight="70dp"
                 android:layout_marginTop="-10dp"
+                android:layout_marginRight="70dp"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -261,7 +288,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:src="@drawable/play_rdi_btn_play" />
+                    android:src="@drawable/play_rdi_btn_pause" />
 
                 <ImageView
                     android:id="@+id/playing_next"
@@ -276,6 +303,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginRight="35dp"
                     android:layout_weight="1"
                     android:src="@drawable/list_icn_mng" />
 

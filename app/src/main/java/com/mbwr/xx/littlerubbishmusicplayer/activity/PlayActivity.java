@@ -26,7 +26,7 @@ import android.widget.Toast;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
-import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -34,8 +34,8 @@ import java.lang.ref.WeakReference;
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mCmt, mFav, mDown, mMore, mNeedle, mOutLocal;
-    private TextView mTimePlayed, mDuration;
-    private SeekBar mProgress;
+    private static TextView mTimePlayed, mDuration,mSongName,mSingerName;
+    private static SeekBar mProgress;
 
     private AnimatorSet mAnimatorSet;
     private BitmapFactory.Options mNewOpts;
@@ -68,8 +68,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private MusicServiceConnection connection;
     private MediaController mediaController;
 
-    //ui线程Hander
-    public static Handler handler = new Handler() {
+    //ui线程Hander,用以控制音乐播放界面
+    public static Handler playHandler = new Handler() {
         /**
          * Subclasses must implement this to receive messages.
          *
@@ -78,8 +78,23 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what) {
-
+            switch (msg.what) {//what==0:音乐信息初始化(歌名,长度等);what==1:播放信息更新
+                case 0:
+                    String songName = msg.getData().getString("songName");
+                    String singer = msg.getData().getString("singer");
+                    int songTime = msg.getData().getInt("duration");
+                    int timePlayed = msg.getData().getInt("currentPosition");
+                    mSongName.setText(songName);
+                    mSingerName.setText(singer);
+                    mTimePlayed.setText(TimeUtils.convertIntTime2String(timePlayed));
+                    mDuration.setText(TimeUtils.convertIntTime2String(songTime));
+                    mProgress.setMax(songTime);
+                    break;
+                case 1:
+                    int playedTime = msg.getData().getInt("currentPosition");
+                    mProgress.setProgress(playedTime);
+                    mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
+                    break;
             }
         }
     };
@@ -88,8 +103,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playing);
-        //除去action bar
-
         toolbar = findViewById(R.id.toolbar);
 
         mAlbumLayout = findViewById(R.id.headerView);
@@ -101,6 +114,13 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 //        mMore = findViewById(R.id.playing_more);
 //        mCmt = findViewById(R.id.playing_cmt);
 //        mFav = findViewById(R.id.playing_fav);
+
+
+        //音乐时长
+        mDuration = findViewById(R.id.music_duration);
+        mTimePlayed = findViewById(R.id.music_duration_played);
+        mSongName = findViewById(R.id.songname);
+        mSingerName = findViewById(R.id.singername);
 
         //返回
         mOutLocal = findViewById(R.id.out_local);
@@ -122,24 +142,27 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         mDuration = findViewById(R.id.music_duration);
         //歌曲播放进度条
         mProgress = findViewById(R.id.play_seek);
-        mProgress.setMax(1000);
+//        mProgress.setMax(1000);
         //注册监听事件
         mProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.i(TAG, "onProgressChanged");
-                Log.i(TAG, progress + "");
-
+                if (fromUser) {
+                    Log.i(TAG, "seekBarChangeFromUser");
+                    mediaController.UpdatePlayTime(progress);
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 Log.i(TAG, "onStartTrackingTouch");
+                mediaController.StopTimeTask();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 Log.i(TAG, "onStopTrackingTouch");
+                mediaController.StartTimeTask();
             }
         });
         //
@@ -148,12 +171,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         mVolumeSeek = findViewById(R.id.volume_seek);
 
         //混合方式开启服务
-        Intent intent = new Intent(this, PhoneListenerService.class);
+        Intent intent = new Intent(this, MusicPlayerManager.class);
         startService(intent);
         //调用bindservice 获取定义的中间人对象  就可以通过mediaController间接的调用服务里面的方法
         connection = new MusicServiceConnection();
         bindService(intent, connection, BIND_AUTO_CREATE);
-
         //注册点击事件
         mOutLocal.setOnClickListener(this);
         mPlayingmode.setOnClickListener(this);
@@ -162,8 +184,26 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         mPre.setOnClickListener(this);
         mPlaylist.setOnClickListener(this);
         mDown.setOnClickListener(this);
+        Log.i(TAG,"onCreate");
+    }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.i(TAG, "activity resume");
+    }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+//        mediaController.UpdateSongInfo();
+    }
+
+    @Override
+    protected void onDestroy() {
+        //解绑服务
+        unbindService(connection);
+        super.onDestroy();
     }
 
     /**
@@ -175,6 +215,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.out_local:
+                finish();
                 break;
             case R.id.playing_mode:
                 playMode++;
@@ -198,9 +239,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.playing_play:
                 if (isPlaying) {
                     mediaController.CallPause();
+                    mControl.setImageResource(R.drawable.play_rdi_btn_pause);
                     isPlaying = false;
                 } else {
                     mediaController.CallPlay();
+                    mControl.setImageResource(R.drawable.play_rdi_btn_play);
                     isPlaying = true;
                 }
                 break;
@@ -212,11 +255,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.playing_down:
                 //文件下载
-
+                mediaController.UpdateSongInfo();
                 break;
             case R.id.playing_playlist:
                 //显示当前歌单列表
-
                 break;
         }
     }
@@ -229,10 +271,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         public void onServiceConnected(ComponentName name, IBinder service) {
             //获取中间人对象
             mediaController = (MediaController) service;
+            Log.i(TAG, "服务连接成功!");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "服务断开连接.....");
             mediaController = null;
         }
 

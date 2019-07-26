@@ -14,9 +14,9 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory{
+public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    private final static String TAG="Music Widget";
+    private final static String TAG = ListRemoteViewsFactory.class.getSimpleName();
 
     private Context mContext;
 
@@ -36,7 +36,7 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
     @Override
     public RemoteViews getViewAt(int position) {
 
-        Log.i("getViewAt","position="+position);
+        Log.i(TAG, "position=" + position);
 
         // 获取 item_widget_device.xml 对应的RemoteViews
         RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.item_widget_device);
@@ -72,23 +72,18 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
      */
     private void initListViewData() {
         mDevices = new ArrayList<>();
-//        mDevices.add(new Device("喜欢你哦", 0));
-//        mDevices.add(new Device("Oitsme", 1));
-//        mDevices.add(new Device("Hi", 0));
-//        mDevices.add(new Device("Hey", 1));
-//        mDevices = LitePal.findAll(Device.class);
-//        int temp = 0;
     }
 
     private static int i;
-    public static void refresh(){
+
+    public static void refresh() {
         i++;
-        mDevices.add(new Device("Refresh"+i, 1));
+        mDevices.add(new Device("Refresh" + i, 1));
     }
 
     @Override
     public void onCreate() {
-        Log.e(TAG,"onCreate");
+        Log.e(TAG, "onCreate");
         // 初始化“集合视图”中的数据
         initListViewData();
     }

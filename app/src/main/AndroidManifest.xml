@@ -18,7 +18,7 @@
             android:name=".activity.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_welcome"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,31 +33,31 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PlayActivity"/>
+        <activity
+            android:name=".activity.PlayActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name=".activity.MusicPlayActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
-        </activity> <!-- Service -->
+        </activity>
         <service android:name=".service.PhoneListenerService">
             <intent-filter>
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
             </intent-filter>
         </service>
-        <service android:name=".service.MusicPlayerManager" />
+        <service android:name=".service.MusicPlayerManager" >
+
+        </service>
         <service
             android:name=".ListWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
+        <receiver android:name=".service.MusicPlayerManager$MusicReceiver"/>
+
         <receiver android:name=".ListWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <!-- ListWidgetProvider接收点击ListView的响应事件 -->
-                <action android:name="com.zhpan.COLLECTION_VIEW_ACTION" />
-                <!-- ListWidgetProvider接收点击bt_refresh的响应事件 -->
-                <!-- <action android:name="com.zhpan.REFRESH_WIDGET" /> -->
-                <action android:name="com.zhpan.LOCK_ACTION" />
-                <action android:name="com.zhpan.UNLOCK_ACTION" />
             </intent-filter>
 
             <meta-data

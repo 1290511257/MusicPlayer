@@ -3,7 +3,7 @@
     android:id="@+id/ll_right"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/ic_widget"
+    android:background="#30000000"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -17,7 +17,7 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="5dp"
             android:layout_marginStart="5dp"
-            android:background="@mipmap/ic_launcher_round" />
+            android:background="@drawable/actionbar_discover_normal" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,7 +33,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_toEndOf="@id/iv_icon"
                 android:maxLines="1"
-                android:text="K歌之王-Live"
                 android:textColor="@color/gray_40"
                 android:textSize="20sp" />
 
@@ -43,7 +42,6 @@
                 android:layout_marginTop="5dp"
                 android:layout_below="@id/tv_title"
                 android:maxLines="1"
-                android:text="Eason"
                 android:textColor="@color/gray_40"
                 android:textSize="15sp"/>
         </LinearLayout>
@@ -71,7 +69,7 @@
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:padding="5dp"
-                android:text="刷新"
+                android:text="播放器"
                 android:textColor="@color/gray_40"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -129,32 +127,44 @@
         android:id="@+id/widget_control"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:paddingLeft="35dp"
         android:paddingRight="35dp">
+
         <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:src="@drawable/play_icn_one"
+
+            />
+        <ImageView
+            android:id="@+id/widget_pre"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:src="@drawable/widget_pre_selector"
-            android:id="@+id/widget_pre"
-            android:layout_width="36dp"
-            android:layout_height="36dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
         <ImageView
+            android:id="@+id/widget_play"
             android:layout_weight="1"
             android:src="@drawable/widget_play_selector"
             android:layout_gravity="center_vertical"
-            android:id="@+id/widget_play"
-            android:layout_width="43dp"
-            android:layout_height="43dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
         <ImageView
+            android:id="@+id/widget_next"
             android:layout_weight="1"
             android:src="@drawable/widget_next_selector"
             android:layout_gravity="center_vertical"
-            android:id="@+id/widget_next"
-            android:layout_width="36dp"
-            android:layout_height="36dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
