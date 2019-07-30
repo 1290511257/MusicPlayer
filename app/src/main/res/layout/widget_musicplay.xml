@@ -27,7 +27,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_title"
+                android:id="@+id/song_name"
                 android:layout_width="match_parent"
                 android:layout_height="26dp"
                 android:layout_marginTop="4dp"
@@ -37,13 +37,14 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/singer_name"
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
+                android:layout_below="@id/song_name"
                 android:layout_marginTop="5dp"
-                android:layout_below="@id/tv_title"
                 android:maxLines="1"
                 android:textColor="@color/gray_40"
-                android:textSize="15sp"/>
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -53,15 +54,6 @@
             android:layout_alignParentEnd="true"
             android:gravity="center_vertical"
             android:orientation="horizontal">
-
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:indeterminateTint="@color/colorAccent"
-                android:indeterminateTintMode="src_atop"
-                android:visibility="gone" />
-
             <TextView
                 android:id="@+id/tv_refresh"
                 android:layout_width="wrap_content"
@@ -69,7 +61,7 @@
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:padding="5dp"
-                android:text="播放器"
+                android:text="打开播放器"
                 android:textColor="@color/gray_40"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -82,7 +74,6 @@
         android:layout_height="wrap_content"
         android:max="100"
         android:min="0"
-        android:progress="50"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -96,7 +87,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/music_duration_played"
+            android:id="@+id/widget_duration_played"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -109,7 +100,7 @@
 
 
         <TextView
-            android:id="@+id/music_duration"
+            android:id="@+id/widget_duration_total"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -132,13 +123,12 @@
         android:paddingRight="35dp">
 
         <ImageView
+            android:id="@+id/widget_play_mode"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_gravity="center"
-            android:src="@drawable/play_icn_one"
-
-            />
+            android:layout_weight="1"
+            android:src="@drawable/play_icn_one" />
         <ImageView
             android:id="@+id/widget_pre"
             android:layout_gravity="center_vertical"
@@ -149,7 +139,7 @@
         <ImageView
             android:id="@+id/widget_play"
             android:layout_weight="1"
-            android:src="@drawable/widget_play_selector"
+            android:src="@drawable/widget_pause_selector"
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />
@@ -165,29 +155,4 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="10dp" />
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/transparent">
-        <ListView
-            android:id="@+id/lv_device"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/transparent"
-            android:dividerHeight="0.5dp"
-
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tv_no_device"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:background="@color/transparent"
-            android:gravity="center"
-            android:text="@string/widget_no_device"
-            android:textColor="@color/gray_40"
-            android:visibility="gone" />
-    </FrameLayout>
-
-
 </LinearLayout>

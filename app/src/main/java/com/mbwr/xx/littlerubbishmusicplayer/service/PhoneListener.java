@@ -1,5 +1,6 @@
 package com.mbwr.xx.littlerubbishmusicplayer.service;
 
+import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -7,27 +8,34 @@ import android.util.Log;
 public class PhoneListener extends PhoneStateListener {
 
     private static final String TAG = PhoneListener.class.getSimpleName();
-    //当电话状态发生改变时回调此方法
+
+    private static boolean aBoolean = true;//只有在电话来后变为IDLE才重新播放音乐
+
     @Override
     public void onCallStateChanged(int state, String phoneNumber) {
         super.onCallStateChanged(state, phoneNumber);
-        try {
-            switch (state){
-                case TelephonyManager.CALL_STATE_IDLE: //无任何状态时
-                    Log.i(TAG,"CALL_STATE_IDLE");
 
-                    break;
-                case TelephonyManager.CALL_STATE_OFFHOOK: //接通
-                    Log.i(TAG,"CALL_STATE_OFFHOOK");
-
-                    break;
-                case TelephonyManager.CALL_STATE_RINGING://响铃
-                    Log.i(TAG,"CALL_STATE_RINGING");
-                    MusicPlayerManager.getInstance().pause();
-                    break;
-            }
-        }catch (Exception e){
-            Log.i("Exception", e.toString());
+        switch (state) {
+            case TelephonyManager.CALL_STATE_IDLE: //无任何状态时
+                Log.i(TAG, "CALL_STATE_IDLE");
+//                if (!aBoolean) {
+//                    Message message = new Message();
+//                    message.what = 1;
+//                    MusicPlayerManager.phoneListenerHander.sendMessage(message);
+//                    aBoolean = true;
+//                }
+                break;
+            case TelephonyManager.CALL_STATE_OFFHOOK: //接通
+                Log.i(TAG, "CALL_STATE_OFFHOOK");
+                break;
+            case TelephonyManager.CALL_STATE_RINGING://响铃
+                Log.i(TAG, "CALL_STATE_RINGING");
+                Message message = new Message();
+                message.what = 0;
+                MusicPlayerManager.phoneListenerHander.sendMessage(message);
+                aBoolean = false;
+                break;
         }
+
     }
 }

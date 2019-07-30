@@ -250,7 +250,7 @@
                     android:thumb="@drawable/play_plybar_btn" />
 
                 <TextView
-                    android:id="@+id/music_duration"
+                    android:id="@+id/music_duration_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"

@@ -6,15 +6,16 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
+import android.content.IntentFilter;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RemoteViews;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
 public class ListWidgetProvider extends AppWidgetProvider {
@@ -22,30 +23,41 @@ public class ListWidgetProvider extends AppWidgetProvider {
     private static final String TAG = ListWidgetProvider.class.getSimpleName();
 
     public static final String OPEN_MUSIC_ACTIVITY = "com.mbwr.xx.OPEN_MUSIC_ACTIVITY";
+
+    public static final String PLAY_MODE = "com.mbwr.xx.PLAY_MODE";
     public static final String NEXT_MUSIC = "com.mbwr.xx.NEXT_MUSIC";
     public static final String LAST_MUSIC = "com.mbwr.xx.LAST_MUSIC";
     public static final String PLAY_MUSIC = "com.mbwr.xx.PLAY_MUSIC";
-    public static final String COLLECTION_VIEW_ACTION = "com.oitsme.COLLECTION_VIEW_ACTION";
+
+    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
+    public static final String UPDATE_PROGRESS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
+    public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
+
     public static final String COLLECTION_VIEW_EXTRA = "com.oitsme.COLLECTION_VIEW_EXTRA";
 
-    private TextView mTvDef;
+    private static int mProgressMax,playMode;
 
-    private SeekBar mSeekBarDef;
+    /**
+     * 当一个App Widget实例第一次创建时被调用。
+     * 比如，如果用户添加两个App Widget实例，只在第一次被调用。
+     * 如果你需要打开一个新的数据库或者执行其他对于所有的App Widget实例只需要发生一次的设置，
+     * 那么在这里完成这个工作。
+     */
+    @Override
+    public void onEnabled(Context context) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UPDATE_MUSIC_INFO);
+        intentFilter.addAction(UPDATE_MODE_STATUS);
+        intentFilter.addAction(UPDATE_PROGRESS);
+        Utils.getContext().registerReceiver(this, intentFilter);
 
-    private static Handler mHandler = new Handler();
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            hideLoading(Utils.getContext());
-            Toast.makeText(Utils.getContext(), "刷新成功", Toast.LENGTH_SHORT).show();
-        }
-    };
-
+        super.onEnabled(context);
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
-        Log.d(TAG, "ListWidgetProvider onUpdate Start");
+        Log.d(TAG, "onUpdate Start");
         for (int appWidgetId : appWidgetIds) {
             // 获取AppWidget对应的视图
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
@@ -55,6 +67,10 @@ public class ListWidgetProvider extends AppWidgetProvider {
             startAppIntent.setComponent(new ComponentName(context, com.mbwr.xx.littlerubbishmusicplayer.ListWidgetProvider.class));
             PendingIntent startAppPendingIntent = PendingIntent.getBroadcast(context, 0, startAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             remoteViews.setOnClickPendingIntent(R.id.tv_refresh, startAppPendingIntent);
+
+            Intent playModeIntent = new Intent().setAction(PLAY_MODE);
+            PendingIntent playModePendingIntent = PendingIntent.getBroadcast(context, 0, playModeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            remoteViews.setOnClickPendingIntent(R.id.widget_play_mode, playModePendingIntent);
 
             Intent nextMusicIntent = new Intent().setAction(NEXT_MUSIC);
             PendingIntent nextMusicPendingIntent = PendingIntent.getBroadcast(context, 0, nextMusicIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -68,108 +84,119 @@ public class ListWidgetProvider extends AppWidgetProvider {
             PendingIntent playMusicPendingIntent = PendingIntent.getBroadcast(context, 0, playMusicIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             remoteViews.setOnClickPendingIntent(R.id.widget_play, playMusicPendingIntent);
 
-
-            // remoteViews.
-            // 设置 “ListView” 的adapter。
-            // (01) intent: 对应启动 ListWidgetService(RemoteViewsService) 的intent
-            // (02) setRemoteAdapter: 设置 gridview的适配器
-            //     通过setRemoteAdapter将ListView和ListWidgetService关联起来，
-            //    以达到通过 ListWidgetService 更新 ListView的目的
-//            Intent serviceIntent = new Intent(context, ListWidgetService.class);
-            //serviceIntent.setComponent(new ComponentName(context,com.example.xx.myapplication01.widget.ListWidgetProvider.class));
-//            remoteViews.setRemoteAdapter(R.id.lv_device, serviceIntent);
-
-            // 设置响应 “ListView” 的intent模板
-            // 说明：“集合控件(如GridView、ListView、StackView等)”中包含很多子元素，如GridView包含很多格子。
-            // 它们不能像普通的按钮一样通过 setOnClickPendingIntent 设置点击事件，必须先通过两步。
-            // (01) 通过 setPendingIntentTemplate 设置 “intent模板”，这是比不可少的！
-            // (02) 然后在处理该“集合控件”的RemoteViewsFactory类的getViewAt()接口中 通过 setOnClickFillInIntent 设置“集合控件的某一项的数据”
-//            Intent gridIntent = new Intent();
-//            gridIntent.setComponent(new ComponentName(context,com.mbwr.xx.littlerubbishmusicplayer.ListWidgetProvider.class));
-//            gridIntent.setAction(COLLECTION_VIEW_ACTION);
-//            gridIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-//            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, gridIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            // 设置intent模板
-//            remoteViews.setPendingIntentTemplate(R.id.lv_device, pendingIntent);
-            // 调用集合管理器对集合进行更新
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.i(TAG, "ListWidgetProvider onReceive");
         String action = intent.getAction();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
-        // 接受MusicWidget的点击事件的广播
+
         switch (action) {
             case OPEN_MUSIC_ACTIVITY:
-                enableMusicActivity(context);
+                enableMusicActivity(Utils.getContext());
                 break;
-            case LAST_MUSIC:
+            case UPDATE_MUSIC_INFO:
+                updateMusicInfo(context,intent);
                 break;
-            case PLAY_MUSIC:
+            case UPDATE_MODE_STATUS:
+                updateModeAndStatus(context,intent);
                 break;
-            case NEXT_MUSIC:
+            case UPDATE_PROGRESS:
+                updateProgress(context,intent);
                 break;
         }
         super.onReceive(context, intent);
     }
 
     /**
-     * 显示加载loading
+     * @author xuxiong
+     * @time 7/25/19  10:12 PM
+     * @describe 更新播放进度条
      */
-    private void showLoading(Context context) {
+    private void updateProgress(Context context, Intent intent) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
-        remoteViews.setViewVisibility(R.id.tv_refresh, View.VISIBLE);
-        remoteViews.setViewVisibility(R.id.progress_bar, View.VISIBLE);
-        remoteViews.setTextViewText(R.id.tv_refresh, "正在刷新...");//文本更新
-        refreshWidget(context, remoteViews, false);
-    }
-
-    /**
-     * 隐藏加载loading
-     */
-    private void hideLoading(Context context) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
-        remoteViews.setViewVisibility(R.id.progress_bar, View.GONE);
-        remoteViews.setTextViewText(R.id.tv_refresh, "刷新");
-        refreshWidget(context, remoteViews, false);
+        Bundle bd = intent.getExtras();
+        int mProgress = bd.getInt("currentPosition");
+        remoteViews.setProgressBar(R.id.music_progress,mProgressMax,mProgress,false);
+        remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
+        refreshWidget(context, remoteViews);
     }
 
     /**
      * @author xuxiong
-     * @time 7/25/19  10:12 PM
-     * @describe 更新进度条
+     * @time 7/29/19  1:19 AM
+     * @describe 更新播放音乐信息
      */
-    private void refreshProgress(Context context) {
+    private void updateMusicInfo(Context context, Intent intent) {
 
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        Bundle bd = intent.getExtras();
+        mProgressMax = bd.getInt("duration");
+        int mProgress = bd.getInt("currentPosition");
+
+        remoteViews.setTextViewText(R.id.song_name, bd.getString("songName"));
+        remoteViews.setTextViewText(R.id.singer_name, bd.getString("singer"));
+        remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
+        remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
+        remoteViews.setProgressBar(R.id.music_progress,mProgressMax,0,false);
+
+        refreshWidget(context, remoteViews);
     }
 
     /**
-     *  @author xuxiong
-     *  @time 7/26/19  1:07 AM
-     *  @describe 进入音乐播放界面
+     * @author xuxiong
+     * @time 7/29/19  1:19 AM
+     * @describe 更新播放模式和播放状态
      */
-    private void enableMusicActivity(Context context){
+    private void updateModeAndStatus(Context context, Intent intent) {
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        Bundle bd = intent.getExtras();
+
+        playMode = bd.getInt("playMode");
+        boolean isPlaying = bd.getBoolean("playStatu");
+        switch (playMode){//1顺序循环 2随机循环 3单曲循环
+            case 1:
+                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_loop);
+                break;
+            case 2:
+                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_shuffle);
+                break;
+            case 3:
+                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_one);
+                break;
+        }
+
+        if(isPlaying){
+            remoteViews.setImageViewResource(R.id.widget_play,R.drawable.widget_play_selector);
+        }else {
+            remoteViews.setImageViewResource(R.id.widget_play,R.drawable.widget_pause_selector);
+        }
+        refreshWidget(context, remoteViews);
+    }
+
+    /**
+     * @author xuxiong
+     * @time 7/26/19  1:07 AM
+     * @describe 进入音乐播放界面
+     */
+    private void enableMusicActivity(Context context) {
         Intent intent = new Intent(context, PlayActivity.class);
+        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);//小部件启动application需要设置flag
         context.startActivity(intent);
     }
+
     /**
      * 刷新Widget
      */
-    private void refreshWidget(Context context, RemoteViews remoteViews, boolean refreshList) {
+    private void refreshWidget(Context context, RemoteViews remoteViews) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         ComponentName componentName = new ComponentName(context, ListWidgetProvider.class);
         appWidgetManager.updateAppWidget(componentName, remoteViews);
-        if (refreshList)
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetManager.getAppWidgetIds(componentName), R.id.lv_device);
     }
-
-
 }

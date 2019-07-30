@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +15,9 @@ import android.view.View;
 
 import com.mbwr.xx.littlerubbishmusicplayer.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,7 +25,7 @@ import java.util.TimerTask;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends BaseActivity {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.

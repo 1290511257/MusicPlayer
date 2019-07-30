@@ -33,8 +33,8 @@ import java.lang.ref.WeakReference;
 
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mCmt, mFav, mDown, mMore, mNeedle, mOutLocal;
-    private static TextView mTimePlayed, mDuration,mSongName,mSingerName;
+    private static ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mCmt, mFav, mDown, mMore, mNeedle, mOutLocal;
+    private static TextView mTimePlayed, mDuration, mSongName, mSingerName;
     private static SeekBar mProgress;
 
     private AnimatorSet mAnimatorSet;
@@ -78,7 +78,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what) {//what==0:音乐信息初始化(歌名,长度等);what==1:播放信息更新
+            switch (msg.what) {//what==0:音乐信息初始化(歌名,长度等);what==1:播放进度更新;what==2:播放状态更新
                 case 0:
                     String songName = msg.getData().getString("songName");
                     String singer = msg.getData().getString("singer");
@@ -94,6 +94,26 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     int playedTime = msg.getData().getInt("currentPosition");
                     mProgress.setProgress(playedTime);
                     mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
+                    break;
+                case 2:
+                    int playMode = msg.getData().getInt("playMode");
+                    boolean isPlaying = msg.getData().getBoolean("playStatu");
+                    switch (playMode - 1) {
+                        case 0:
+                            mPlayingmode.setImageResource(R.drawable.play_icn_loop);
+                            break;
+                        case 1:
+                            mPlayingmode.setImageResource(R.drawable.play_icn_shuffle);
+                            break;
+                        case 2:
+                            mPlayingmode.setImageResource(R.drawable.play_icn_one);
+                            break;
+                    }
+                    if(isPlaying){
+                        mControl.setImageResource(R.drawable.play_rdi_btn_play);
+                    }else {
+                        mControl.setImageResource(R.drawable.play_rdi_btn_pause);
+                    }
                     break;
             }
         }
@@ -117,7 +137,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
 
         //音乐时长
-        mDuration = findViewById(R.id.music_duration);
+        mDuration = findViewById(R.id.music_duration_total);
         mTimePlayed = findViewById(R.id.music_duration_played);
         mSongName = findViewById(R.id.songname);
         mSingerName = findViewById(R.id.singername);
@@ -139,7 +159,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         //播放时长
         mTimePlayed = findViewById(R.id.music_duration_played);
         //歌曲总时长
-        mDuration = findViewById(R.id.music_duration);
+        mDuration = findViewById(R.id.music_duration_total);
         //歌曲播放进度条
         mProgress = findViewById(R.id.play_seek);
 //        mProgress.setMax(1000);
@@ -148,20 +168,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    Log.i(TAG, "seekBarChangeFromUser");
                     mediaController.UpdatePlayTime(progress);
                 }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "onStartTrackingTouch");
                 mediaController.StopTimeTask();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "onStopTrackingTouch");
                 mediaController.StartTimeTask();
             }
         });
@@ -184,7 +201,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         mPre.setOnClickListener(this);
         mPlaylist.setOnClickListener(this);
         mDown.setOnClickListener(this);
-        Log.i(TAG,"onCreate");
+        Log.i(TAG, "onCreate");
     }
 
     @Override
@@ -196,7 +213,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-//        mediaController.UpdateSongInfo();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 
     @Override
@@ -281,5 +303,4 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
 }

@@ -3,9 +3,9 @@ package com.mbwr.xx.littlerubbishmusicplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
@@ -16,11 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
-import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
 
 import org.litepal.LitePal;
+
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity
         //打开播放界面
         Intent intent1 = new Intent(this, PlayActivity.class);
         startActivity(intent1);
+
+//        checkLanguage();
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -102,8 +105,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             sendBroadcast(new Intent("com.mbwr.xx.PLAY_MUSIC"));
         } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(this, MusicPlayActivity.class);
-            startActivity(intent);
+
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_tools) {
@@ -131,6 +133,23 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
+    private void checkLanguage(){
+        String ss = Locale.getDefault().getLanguage();
+        //用if语句判断，如果当前为中文就变成英文，反之变成中文
+        if (ss.equals("zh")){
+            Locale.setDefault(Locale.ENGLISH);
+            Configuration configuration = getBaseContext().getResources().getConfiguration();
+            configuration.locale = Locale.ENGLISH;
+            getBaseContext().getResources().updateConfiguration(configuration,getBaseContext().getResources().getDisplayMetrics());
+            recreate();
+        }else {
+            Locale.setDefault(Locale.CHINESE);
+            Configuration configuration = getBaseContext().getResources().getConfiguration();
+            configuration.locale = Locale.CHINESE;
+            getBaseContext().getResources().updateConfiguration(configuration,getBaseContext().getResources().getDisplayMetrics());
+            recreate();
+        }
+    }
 
     //请求储存卡权限读取
     public static void verifyStoragePermissions(Activity activity) {
