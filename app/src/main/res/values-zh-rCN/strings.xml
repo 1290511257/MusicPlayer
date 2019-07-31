@@ -1,0 +1,36 @@
+<resources>
+
+    <string name="app_name">音乐播放器</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Little Rubbish</string>
+    <string name="nav_header_subtitle">xuxiong@sagereal.com</string>
+    <string name="nav_header_desc">导航</string>
+    <string name="action_settings">设置</string>
+
+    <string name="menu_home">主界面</string>
+    <string name="menu_gallery">相册</string>
+    <string name="menu_slideshow">视频</string>
+    <string name="menu_tools">工具</string>
+    <string name="menu_share">分享</string>
+    <string name="menu_send">发送</string>
+
+    <string name="widget_no_device">暂无设备</string>
+    <string name="appwidget_text">示例</string>
+    <string name="add_widget">添加小部件</string>
+    <string name="text_def">默认</string>
+    <string name="text_self">自定义</string>
+
+    <string name="title_activity_welcome">音乐播放器</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">音乐播放器</string>
+    <string name="title_home">主界面</string>
+    <string name="title_dashboard">仪表板</string>
+    <string name="title_notifications">通知</string>
+
+    <string name="title_activity_music_play">MusicPlayActivity</string>
+    <string name="widget_button_open_musicManager_text">打开</string>
+    <string name="getSongImageAndLrc">获取封面和歌词</string>
+
+
+</resources>
