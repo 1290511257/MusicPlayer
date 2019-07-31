@@ -1,4 +1,4 @@
-package com.mbwr.xx.littlerubbishmusicplayer;
+package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
+import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
 
@@ -23,7 +24,7 @@ import org.litepal.LitePal;
 
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //请求储存卡权限
@@ -58,8 +59,6 @@ public class MainActivity extends AppCompatActivity
         //打开播放界面
         Intent intent1 = new Intent(this, PlayActivity.class);
         startActivity(intent1);
-
-//        checkLanguage();
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -103,7 +102,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            sendBroadcast(new Intent("com.mbwr.xx.PLAY_MUSIC"));
+            Intent intent = new Intent(this,testActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -121,8 +121,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    //应用程序被系统中断时调用此方法,当应用被任何系统服务中断时均会调用此方法.
-    //缺点是无法针对具体的占用作出反应
     @Override
     protected void onPause() {
         super.onPause();
@@ -131,24 +129,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop(){
         super.onStop();
-    }
-
-    private void checkLanguage(){
-        String ss = Locale.getDefault().getLanguage();
-        //用if语句判断，如果当前为中文就变成英文，反之变成中文
-        if (ss.equals("zh")){
-            Locale.setDefault(Locale.ENGLISH);
-            Configuration configuration = getBaseContext().getResources().getConfiguration();
-            configuration.locale = Locale.ENGLISH;
-            getBaseContext().getResources().updateConfiguration(configuration,getBaseContext().getResources().getDisplayMetrics());
-            recreate();
-        }else {
-            Locale.setDefault(Locale.CHINESE);
-            Configuration configuration = getBaseContext().getResources().getConfiguration();
-            configuration.locale = Locale.CHINESE;
-            getBaseContext().getResources().updateConfiguration(configuration,getBaseContext().getResources().getDisplayMetrics());
-            recreate();
-        }
     }
 
     //请求储存卡权限读取

@@ -1,4 +1,4 @@
-package com.mbwr.xx.littlerubbishmusicplayer;
+package com.mbwr.xx.littlerubbishmusicplayer.widget;
 
 import android.content.Intent;
 import android.widget.RemoteViewsService;

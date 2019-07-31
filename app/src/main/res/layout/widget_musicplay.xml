@@ -3,20 +3,20 @@
     android:id="@+id/ll_right"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#30000000"
+    android:background="@color/wiget_background_color"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp">
+        android:layout_height="@dimen/music_info_relative_layout_height">
 
         <ImageView
             android:id="@+id/iv_icon"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/widget_songInfo_image_layout_width"
+            android:layout_height="@dimen/widget_songInfo_image_layout_width"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginEnd="@dimen/widget_songInfo_image_layout_marginEnd"
+            android:layout_marginStart="@dimen/widget_songInfo_image_layout_marginEnd"
             android:background="@drawable/actionbar_discover_normal" />
 
         <LinearLayout
@@ -29,22 +29,22 @@
             <TextView
                 android:id="@+id/song_name"
                 android:layout_width="match_parent"
-                android:layout_height="26dp"
-                android:layout_marginTop="4dp"
+                android:layout_height="@dimen/widget_songInfo_songName_textView_height"
+                android:layout_marginTop="@dimen/widget_songInfo_songName_textView_marginTop"
                 android:layout_toEndOf="@id/iv_icon"
                 android:maxLines="1"
                 android:textColor="@color/gray_40"
-                android:textSize="20sp" />
+                android:textSize="@dimen/widget_songInfo_songName_textView_fontSize" />
 
             <TextView
                 android:id="@+id/singer_name"
                 android:layout_width="match_parent"
-                android:layout_height="25dp"
+                android:layout_height="@dimen/widget_songInfo_singerName_textView_height"
                 android:layout_below="@id/song_name"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="@dimen/widget_songInfo_singerName_textView_marginTop"
                 android:maxLines="1"
                 android:textColor="@color/gray_40"
-                android:textSize="15sp" />
+                android:textSize="@dimen/widget_songInfo_singerName_textView_fontSize" />
         </LinearLayout>
 
         <LinearLayout
@@ -55,15 +55,15 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <TextView
-                android:id="@+id/tv_refresh"
+                android:id="@+id/tb_openApp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:padding="5dp"
-                android:text="打开播放器"
+                android:layout_marginStart="@dimen/widget_button_open_marginStart"
+                android:layout_marginEnd="@dimen/widget_button_open_marginStart"
+                android:padding="@dimen/widget_button_open_padding"
+                android:text="@string/widget_button_open_musicManager_text"
                 android:textColor="@color/gray_40"
-                android:textSize="12sp" />
+                android:textSize="@dimen/widget_button_open_textSize" />
         </LinearLayout>
 
     </RelativeLayout>
@@ -74,16 +74,16 @@
         android:layout_height="wrap_content"
         android:max="100"
         android:min="0"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="@dimen/widget_progressBar_marginLeft"
+        android:layout_marginRight="@dimen/widget_progressBar_marginLeft"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="@dimen/widget_timeView_linearLayout_marginLeft"
+        android:layout_marginRight="@dimen/widget_timeView_linearLayout_marginLeft"
         android:orientation="horizontal">
 
         <TextView
@@ -96,7 +96,7 @@
             android:singleLine="true"
             android:text="00:00"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="10sp" />
+            android:textSize="@dimen/widget_timeView_textSize" />
 
 
         <TextView
@@ -109,7 +109,7 @@
             android:singleLine="true"
             android:text="00:00"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="10sp" />
+            android:textSize="@dimen/widget_timeView_textSize" />
 
     </LinearLayout>
 
@@ -118,9 +118,9 @@
         android:id="@+id/widget_control"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="35dp"
-        android:paddingRight="35dp">
+        android:layout_height="@dimen/widget_mediaControl_linearLayout_height"
+        android:paddingLeft="@dimen/widget_mediaControl_linearLayout_paddingLeft"
+        android:paddingRight="@dimen/widget_mediaControl_linearLayout_paddingLeft">
 
         <ImageView
             android:id="@+id/widget_play_mode"
@@ -154,5 +154,5 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="10dp" />
+        android:layout_height="@dimen/widget_paddingTextView_height" />
 </LinearLayout>

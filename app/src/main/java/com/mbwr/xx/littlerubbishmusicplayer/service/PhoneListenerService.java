@@ -16,7 +16,6 @@ public class PhoneListenerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i(TAG, "onbind");
         return null;
     }
 

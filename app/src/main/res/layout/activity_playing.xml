@@ -13,7 +13,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#70000000" />
+        android:background="@color/music_activity_view_background" />
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,8 +33,8 @@
 
             <ImageView
                 android:id="@+id/out_local"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/musicPlay_activity_outLocal_imageView_width"
+                android:layout_height="@dimen/musicPlay_activity_outLocal_imageView_width"
                 android:src="@mipmap/last" />
 
             <LinearLayout
@@ -44,31 +44,29 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/songname"
+                    android:id="@+id/songName"
                     android:layout_width="match_parent"
-                    android:layout_height="27dp"
-                    android:text="K歌之王-Live"
+                    android:layout_height="@dimen/musicPlay_activity_songName_textView_height"
                     android:gravity="center"
                     android:maxLines="1"
                     android:textColor="@color/colorWhite"
-                    android:textSize="20sp"/>
+                    android:textSize="@dimen/musicPlay_activity_songName_textView_textSize"/>
 
                 <TextView
-                    android:id="@+id/singername"
+                    android:id="@+id/singerName"
                     android:layout_width="match_parent"
-                    android:layout_height="22dp"
-                    android:text="Eason"
+                    android:layout_height="@dimen/musicPlay_activity_singerName_textView_height"
                     android:gravity="center"
                     android:maxLines="1"
                     android:textColor="@color/colorWhite"
-                    android:textSize="15sp"/>
+                    android:textSize="@dimen/musicPlay_activity_singerName_textView_textSize"/>
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/headerView"
             android:layout_width="match_parent"
-            android:layout_height="390dp"
+            android:layout_height="@dimen/musicPlay_activity_headerView_frameLayout_height"
             android:layout_below="@+id/toolbar"
             android:layout_marginTop="-6dp">
 
@@ -99,8 +97,8 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/view_line"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="-16dp"
-                    android:layout_marginRight="125dp"
+                    android:layout_marginTop="@dimen/musicPlay_activity_needle_imageView_marginTop"
+                    android:layout_marginRight="@dimen/musicPlay_activity_needle_imageView_marginRight"
                     android:rotation="-30"
                     android:src="@drawable/play_needle"
                     android:transformPivotX="15.1dp"
@@ -110,7 +108,7 @@
         </FrameLayout>
 
         <RelativeLayout
-            android:id="@+id/lrcviewContainer"
+            android:id="@+id/lrcViewContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/bottom_control"
@@ -121,7 +119,7 @@
                 android:id="@+id/volume_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="@dimen/musicPlay_activity_volume_layout_marginTop"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -149,7 +147,7 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tragetlrc"
+                android:id="@+id/targetLrc"
                 android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:layout_alignParentBottom="true"
@@ -160,7 +158,7 @@
                 android:focusable="false"
                 android:gravity="center"
                 android:padding="5dp"
-                android:text="获取封面和歌词"
+                android:text="@string/getSongImageAndLrc"
                 android:textAlignment="center" />
 
         </RelativeLayout>
@@ -171,7 +169,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="@dimen/musicPlay_activity_bottom_control_marginBottom"
             android:gravity="center_horizontal|center_vertical"
             android:orientation="vertical">
 
@@ -179,9 +177,9 @@
                 android:id="@+id/music_tool"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="70dp"
-                android:layout_marginTop="-10dp"
-                android:layout_marginRight="70dp"
+                android:layout_marginLeft="@dimen/musicPlay_activity_musicTool_marginLeft"
+                android:layout_marginTop="@dimen/musicPlay_activity_musicTool_marginTop"
+                android:layout_marginRight="@dimen/musicPlay_activity_musicTool_marginRight"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -220,8 +218,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginLeft="@dimen/musicPlay_activity_seekBar_marginLeft"
+                android:layout_marginRight="@dimen/musicPlay_activity_seekBar_marginLeft"
                 android:orientation="horizontal">
 
                 <TextView
@@ -234,7 +232,7 @@
                     android:singleLine="true"
                     android:text="00:00"
                     android:textColor="@color/colorWhite"
-                    android:textSize="10sp" />
+                    android:textSize="@dimen/musicPlay_activity_music_duration_textSize" />
 
                 <android.support.v7.widget.AppCompatSeekBar
                     android:id="@+id/play_seek"
@@ -243,8 +241,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="22"
-                    android:maxHeight="8dp"
-                    android:minHeight="8dp"
+                    android:maxHeight="@dimen/musicPlay_activity_seekBar_Height"
+                    android:minHeight="@dimen/musicPlay_activity_seekBar_Height"
                     android:progressDrawable="@drawable/play_seekbar"
                     android:secondaryProgress="0"
                     android:thumb="@drawable/play_plybar_btn" />
@@ -258,7 +256,7 @@
                     android:singleLine="true"
                     android:text="00:00"
                     android:textColor="@color/colorWhite"
-                    android:textSize="10sp" />
+                    android:textSize="@dimen/musicPlay_activity_music_duration_textSize" />
             </LinearLayout>
 
             <LinearLayout

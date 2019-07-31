@@ -1,4 +1,4 @@
-package com.mbwr.xx.littlerubbishmusicplayer;
+package com.mbwr.xx.littlerubbishmusicplayer.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -9,11 +9,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
+import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
@@ -64,9 +62,9 @@ public class ListWidgetProvider extends AppWidgetProvider {
 
             Intent startAppIntent = new Intent().setAction(OPEN_MUSIC_ACTIVITY);
             //在安卓8.1+中不支持广播静态注册，而动态注册需要启动应用程序，因此设定componment指定对指定包名进行广播
-            startAppIntent.setComponent(new ComponentName(context, com.mbwr.xx.littlerubbishmusicplayer.ListWidgetProvider.class));
+            startAppIntent.setComponent(new ComponentName(context, ListWidgetProvider.class));
             PendingIntent startAppPendingIntent = PendingIntent.getBroadcast(context, 0, startAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            remoteViews.setOnClickPendingIntent(R.id.tv_refresh, startAppPendingIntent);
+            remoteViews.setOnClickPendingIntent(R.id.tb_openApp, startAppPendingIntent);
 
             Intent playModeIntent = new Intent().setAction(PLAY_MODE);
             PendingIntent playModePendingIntent = PendingIntent.getBroadcast(context, 0, playModeIntent, PendingIntent.FLAG_UPDATE_CURRENT);

@@ -1,4 +1,4 @@
-package com.mbwr.xx.littlerubbishmusicplayer;
+package com.mbwr.xx.littlerubbishmusicplayer.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -7,9 +7,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Device;
-
-import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;

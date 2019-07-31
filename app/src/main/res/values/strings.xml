@@ -14,13 +14,13 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
 
-    <string name="widget_no_device">暂无设备</string>
+    <string name="widget_no_device">No Device</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="text_def">默认</string>
-    <string name="text_self">自定义</string>
+    <string name="text_def">Default</string>
+    <string name="text_self">Customize</string>
 
-    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="title_activity_welcome">MusicPlayer</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">Music Player</string>
     <string name="title_home">Home</string>
@@ -28,4 +28,6 @@
     <string name="title_notifications">Notifications</string>
 
     <string name="title_activity_music_play">MusicPlayActivity</string>
+    <string name="widget_button_open_musicManager_text">Open</string>
+    <string name="getSongImageAndLrc">获取封面和歌词</string>
 </resources>

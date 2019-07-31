@@ -1,20 +1,17 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,41 +25,21 @@ import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 
-import java.lang.ref.WeakReference;
+public class PlayActivity extends BaseActivity implements View.OnClickListener {
 
-
-public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private static ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mCmt, mFav, mDown, mMore, mNeedle, mOutLocal;
+    private static ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal;
     private static TextView mTimePlayed, mDuration, mSongName, mSingerName;
     private static SeekBar mProgress;
 
-    private AnimatorSet mAnimatorSet;
-    private BitmapFactory.Options mNewOpts;
-
-    private View mActiveView;
-    private WeakReference<ObjectAnimator> animatorWeakReference;
-    private WeakReference<View> mViewWeakReference = new WeakReference<View>(null);
-    private boolean isFav = false;
-    private boolean isNextOrPreSetPage = false; //判断viewpager由手动滑动 还是setcruuentitem换页
     private Toolbar toolbar;
     private FrameLayout mAlbumLayout;
     private RelativeLayout mLrcViewContainer;
     private TextView mTryGetLrc;
     private LinearLayout mMusicTool;
     private SeekBar mVolumeSeek;
-    private Handler mHandler;
-    private Handler mPlayHandler;
-    private static final int VIEWPAGER_SCROLL_TIME = 390;
-    private static final int TIME_DELAY = 500;
-    private static final int NEXT_MUSIC = 0;
-    private static final int PRE_MUSIC = 1;
     private int playMode = 0;
     private boolean isPlaying = false;
 
-    private Bitmap mBitmap;
-    private long lastAlbum;
-    private boolean print = true;
     private String TAG = PlayActivity.class.getSimpleName();
 
     private MusicServiceConnection connection;
@@ -122,12 +99,21 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //取消标题
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //取消状态栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_playing);
+
+
         toolbar = findViewById(R.id.toolbar);
 
         mAlbumLayout = findViewById(R.id.headerView);
-        mLrcViewContainer = findViewById(R.id.lrcviewContainer);
-        mTryGetLrc = findViewById(R.id.tragetlrc);
+        mLrcViewContainer = findViewById(R.id.lrcViewContainer);
+        mTryGetLrc = findViewById(R.id.targetLrc);
         mMusicTool = findViewById(R.id.music_tool);
 
 //        mBackAlbum = findViewById(R.id.albumArt);
@@ -135,12 +121,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 //        mCmt = findViewById(R.id.playing_cmt);
 //        mFav = findViewById(R.id.playing_fav);
 
-
         //音乐时长
         mDuration = findViewById(R.id.music_duration_total);
         mTimePlayed = findViewById(R.id.music_duration_played);
-        mSongName = findViewById(R.id.songname);
-        mSingerName = findViewById(R.id.singername);
+        mSongName = findViewById(R.id.songName);
+        mSingerName = findViewById(R.id.singerName);
 
         //返回
         mOutLocal = findViewById(R.id.out_local);
@@ -205,20 +190,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        Log.i(TAG, "activity resume");
-    }
-
-    @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        finish();
     }
 
     @Override

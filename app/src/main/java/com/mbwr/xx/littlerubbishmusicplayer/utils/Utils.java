@@ -7,13 +7,6 @@ import com.mbwr.xx.littlerubbishmusicplayer.BuildConfig;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-/**
- * <pre>
- *     author: zhpan
- *     time  : 16/12/08
- *     desc  : Utils初始化相关
- * </pre>
- */
 public class Utils {
 
     /**

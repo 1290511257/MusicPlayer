@@ -1,23 +1,15 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.mbwr.xx.littlerubbishmusicplayer.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -175,6 +167,12 @@ public class WelcomeActivity extends BaseActivity {
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();//进入后台直接销毁
     }
 
     /**
