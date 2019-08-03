@@ -25,9 +25,9 @@ import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 
-public class PlayActivity extends BaseActivity implements View.OnClickListener {
+public class MusicPlayActivity extends BaseActivity implements View.OnClickListener {
 
-    private static ImageView mBackAlbum, mPlayingmode, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal;
+    private static ImageView mBackAlbum, mPlayingMode, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal;
     private static TextView mTimePlayed, mDuration, mSongName, mSingerName;
     private static SeekBar mProgress;
 
@@ -37,10 +37,11 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener {
     private TextView mTryGetLrc;
     private LinearLayout mMusicTool;
     private SeekBar mVolumeSeek;
+
     private int playMode = 0;
     private boolean isPlaying = false;
 
-    private String TAG = PlayActivity.class.getSimpleName();
+    private String TAG = MusicPlayActivity.class.getSimpleName();
 
     private MusicServiceConnection connection;
     private MediaController mediaController;
@@ -77,13 +78,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener {
                     boolean isPlaying = msg.getData().getBoolean("playStatu");
                     switch (playMode - 1) {
                         case 0:
-                            mPlayingmode.setImageResource(R.drawable.play_icn_loop);
+                            mPlayingMode.setImageResource(R.drawable.play_icn_loop);
                             break;
                         case 1:
-                            mPlayingmode.setImageResource(R.drawable.play_icn_shuffle);
+                            mPlayingMode.setImageResource(R.drawable.play_icn_shuffle);
                             break;
                         case 2:
-                            mPlayingmode.setImageResource(R.drawable.play_icn_one);
+                            mPlayingMode.setImageResource(R.drawable.play_icn_one);
                             break;
                     }
                     if(isPlaying){
@@ -130,7 +131,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener {
         //返回
         mOutLocal = findViewById(R.id.out_local);
         //播放模式
-        mPlayingmode = findViewById(R.id.playing_mode);
+        mPlayingMode = findViewById(R.id.playing_mode);
         //播放&暂停
         mControl = findViewById(R.id.playing_play);
         //下一曲
@@ -180,7 +181,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener {
         bindService(intent, connection, BIND_AUTO_CREATE);
         //注册点击事件
         mOutLocal.setOnClickListener(this);
-        mPlayingmode.setOnClickListener(this);
+        mPlayingMode.setOnClickListener(this);
         mControl.setOnClickListener(this);
         mNext.setOnClickListener(this);
         mPre.setOnClickListener(this);
@@ -218,15 +219,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener {
                 mediaController.UpdatePlayMode(playMode + 1);
                 switch (playMode) {
                     case 0:
-                        mPlayingmode.setImageResource(R.drawable.play_icn_loop);
+                        mPlayingMode.setImageResource(R.drawable.play_icn_loop);
                         Toast.makeText(this, "循环播放", Toast.LENGTH_SHORT).show();
                         break;
                     case 1:
-                        mPlayingmode.setImageResource(R.drawable.play_icn_shuffle);
+                        mPlayingMode.setImageResource(R.drawable.play_icn_shuffle);
                         Toast.makeText(this, "随机播放", Toast.LENGTH_SHORT).show();
                         break;
                     case 2:
-                        mPlayingmode.setImageResource(R.drawable.play_icn_one);
+                        mPlayingMode.setImageResource(R.drawable.play_icn_one);
                         Toast.makeText(this, "单曲循环", Toast.LENGTH_SHORT).show();
                         break;
                 }

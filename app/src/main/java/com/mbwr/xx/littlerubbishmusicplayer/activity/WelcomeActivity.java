@@ -5,11 +5,19 @@ import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 
+import org.litepal.LitePal;
+import org.litepal.tablemanager.callback.DatabaseListener;
+
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -75,7 +83,6 @@ public class WelcomeActivity extends BaseActivity {
     };
 
 
-
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the
      * system UI. This is to prevent the jarring behavior of controls going away
@@ -113,7 +120,6 @@ public class WelcomeActivity extends BaseActivity {
         // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
-
         //延时跳转
         TimerTask timerTask = new TimerTask() {
             @Override
@@ -121,8 +127,9 @@ public class WelcomeActivity extends BaseActivity {
                 init();
             }
         };
-        Timer time=new Timer();
-        time.schedule(timerTask,1500);
+        Timer time = new Timer();
+        time.schedule(timerTask, 1500);
+
     }
 
     @Override
@@ -187,7 +194,7 @@ public class WelcomeActivity extends BaseActivity {
     /**
      * 应用初始化操作
      */
-    private void init(){
+    private void init() {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
     }

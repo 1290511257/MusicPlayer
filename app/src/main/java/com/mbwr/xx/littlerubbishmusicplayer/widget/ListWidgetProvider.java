@@ -12,7 +12,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
@@ -184,7 +184,7 @@ public class ListWidgetProvider extends AppWidgetProvider {
      * @describe 进入音乐播放界面
      */
     private void enableMusicActivity(Context context) {
-        Intent intent = new Intent(context, PlayActivity.class);
+        Intent intent = new Intent(context, MusicPlayActivity.class);
         intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);//小部件启动application需要设置flag
         context.startActivity(intent);
     }

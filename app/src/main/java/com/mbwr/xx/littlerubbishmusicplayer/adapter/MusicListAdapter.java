@@ -9,72 +9,74 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-/**
- * Created by jinpei chen on 2017/5/26.
- */
-
 public class MusicListAdapter extends BaseAdapter {
 
-    private List<Map<String, Object>> musiclist;
+    private static final String TAG = MusicListAdapter.class.getSimpleName();
 
-    private LayoutInflater inflater;//反射器
+    private List<Song> mSongList;
 
-    public static Map<Integer, Boolean> isSelected=new HashMap<Integer, Boolean>();
+    private LayoutInflater mInflater;//反射器
 
-    public MusicListAdapter(Context context){
-        this.inflater= LayoutInflater.from(context);
-    };
+    public static Map<Integer, Boolean> isSelected;
 
-    public void setList(List<Map<String, Object>> list) {
-        this.musiclist = list;
-        for(int i=0;i<list.size();i++){
-            isSelected.put(i,false);
+    public MusicListAdapter(Context context) {
+        this.mInflater = LayoutInflater.from(context);
+    }
+
+    public void setList(List<Song> list) {
+        this.mSongList = list;
+        isSelected = new HashMap<>();
+        for (int i = 0; i < list.size(); i++) {
+            isSelected.put(i, false);
         }
     }
+
     @Override
     public int getCount() {
-        return musiclist.size();
+        return mSongList.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return musiclist.get(position);
+    public Song getItem(int position) {
+        return mSongList.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         ViewHolder holder;
-        if( convertView == null ){
-//            convertView=inflater.inflate(R.layout.musicitem,null);
-            holder=new ViewHolder();
-//            holder.cb = convertView.findViewById(R.id.check_music);
-//            holder.musicname = convertView.findViewById(R.id.music_name);
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.music_sereach_item, null);
+            holder = new ViewHolder();
+            holder.vCheckBox = convertView.findViewById(R.id.check_music);
+            holder.vSongName = convertView.findViewById(R.id.music_name);
             convertView.setTag(holder);
-        }else{
-            holder= (ViewHolder) convertView.getTag();
+        } else {
+            holder = (ViewHolder) convertView.getTag();
         }
-        Map m=musiclist.get(position);
-        holder.cb.setChecked(isSelected.get(position));
-        holder.musicname.setText(m.get("musicname").toString());
+
+        Song mSong = mSongList.get(position);
+        holder.vCheckBox.setChecked(isSelected.get(position));
+        holder.vSongName.setText(mSong.getName() + "-" + mSong.getSinger());
+
         return convertView;
     }
 
-    public class ViewHolder{
+    public class ViewHolder {
 
-        public CheckBox cb;
-        TextView musicname;
+        public CheckBox vCheckBox;
+        TextView vSongName;
 
     }
 }

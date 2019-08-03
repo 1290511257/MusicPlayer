@@ -30,4 +30,5 @@
     <string name="title_activity_music_play">MusicPlayActivity</string>
     <string name="widget_button_open_musicManager_text">Open</string>
     <string name="getSongImageAndLrc">获取封面和歌词</string>
+    <string name="title_activity_music_search">MusicSearchActivity</string>
 </resources>

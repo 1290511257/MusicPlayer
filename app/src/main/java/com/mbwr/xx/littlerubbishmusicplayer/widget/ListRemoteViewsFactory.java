@@ -3,15 +3,10 @@ package com.mbwr.xx.littlerubbishmusicplayer.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-
-import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Device;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
@@ -21,107 +16,107 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
 
     private int mAppWidgetId;
 
-    private static List<Device> mDevices;
+    public ListRemoteViewsFactory(Context context,Intent intent){
+
+    }
 
     /**
-     * 构造GridRemoteViewsFactory
+     * Called when your factory is first constructed. The same factory may be shared across
+     * multiple RemoteViewAdapters depending on the intent passed.
      */
-    public ListRemoteViewsFactory(Context context, Intent intent) {
-        mContext = context;
-        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-    }
-
-    @Override
-    public RemoteViews getViewAt(int position) {
-
-        Log.i(TAG, "position=" + position);
-
-        // 获取 item_widget_device.xml 对应的RemoteViews
-        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.item_widget_device);
-
-        // 设置 第position位的“视图”的数据
-        Device device = mDevices.get(position);
-        //  rv.setImageViewResource(R.id.iv_lock, ((Integer) map.get(IMAGE_ITEM)).intValue());
-        rv.setTextViewText(R.id.tv_name, device.getName());
-
-        // 设置 第position位的“视图”对应的响应事件
-        Intent fillInIntent = new Intent();
-        fillInIntent.putExtra("Type", 0);
-        fillInIntent.putExtra(ListWidgetProvider.COLLECTION_VIEW_EXTRA, position);
-        rv.setOnClickFillInIntent(R.id.rl_widget_device, fillInIntent);
-
-
-        Intent lockIntent = new Intent();
-        lockIntent.putExtra(ListWidgetProvider.COLLECTION_VIEW_EXTRA, position);
-        lockIntent.putExtra("Type", 1);
-        rv.setOnClickFillInIntent(R.id.iv_lock, lockIntent);
-
-        Intent unlockIntent = new Intent();
-        unlockIntent.putExtra("Type", 2);
-        unlockIntent.putExtra(ListWidgetProvider.COLLECTION_VIEW_EXTRA, position);
-        rv.setOnClickFillInIntent(R.id.iv_unlock, unlockIntent);
-
-        return rv;
-    }
-
-
-    /**
-     * 初始化ListView的数据
-     */
-    private void initListViewData() {
-        mDevices = new ArrayList<>();
-    }
-
-    private static int i;
-
-    public static void refresh() {
-        i++;
-        mDevices.add(new Device("Refresh" + i, 1));
-    }
-
     @Override
     public void onCreate() {
-        Log.e(TAG, "onCreate");
-        // 初始化“集合视图”中的数据
-        initListViewData();
+
     }
 
+    /**
+     * Called when notifyDataSetChanged() is triggered on the remote adapter. This allows a
+     * RemoteViewsFactory to respond to data changes by updating any internal references.
+     * <p>
+     * Note: expensive tasks can be safely performed synchronously within this method. In the
+     * interim, the old data will be displayed within the widget.
+     *
+     * @see AppWidgetManager#notifyAppWidgetViewDataChanged(int[], int)
+     */
+    @Override
+    public void onDataSetChanged() {
+
+    }
+
+    /**
+     * Called when the last RemoteViewsAdapter that is associated with this factory is
+     * unbound.
+     */
+    @Override
+    public void onDestroy() {
+
+    }
+
+    /**
+     * See {@link Adapter#getCount()}
+     *
+     * @return Count of items.
+     */
     @Override
     public int getCount() {
-        // 返回“集合视图”中的数据的总数
-        return mDevices.size();
+        return 0;
     }
 
+    /**
+     * See {@link Adapter#getView(int, View, ViewGroup)}.
+     * <p>
+     * Note: expensive tasks can be safely performed synchronously within this method, and a
+     * loading view will be displayed in the interim. See {@link #getLoadingView()}.
+     *
+     * @param position The position of the item within the Factory's data set of the item whose
+     *                 view we want.
+     * @return A RemoteViews object corresponding to the data at the specified position.
+     */
     @Override
-    public long getItemId(int position) {
-        // 返回当前项在“集合视图”中的位置
-        return position;
+    public RemoteViews getViewAt(int position) {
+        return null;
     }
 
+    /**
+     * This allows for the use of a custom loading view which appears between the time that
+     * {@link #getViewAt(int)} is called and returns. If null is returned, a default loading
+     * view will be used.
+     *
+     * @return The RemoteViews representing the desired loading view.
+     */
     @Override
     public RemoteViews getLoadingView() {
         return null;
     }
 
+    /**
+     * See {@link Adapter#getViewTypeCount()}.
+     *
+     * @return The number of types of Views that will be returned by this factory.
+     */
     @Override
     public int getViewTypeCount() {
-        // 只有一类 ListView
-        return 1;
+        return 0;
     }
 
+    /**
+     * See {@link Adapter#getItemId(int)}.
+     *
+     * @param position The position of the item within the data set whose row id we want.
+     * @return The id of the item at the specified position.
+     */
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    /**
+     * See {@link Adapter#hasStableIds()}.
+     *
+     * @return True if the same id always refers to the same object.
+     */
     @Override
     public boolean hasStableIds() {
-        return true;
+        return false;
     }
-
-    @Override
-    public void onDataSetChanged() {
-    }
-
-    @Override
-    public void onDestroy() {
-        mDevices.clear();
-    }
-
 }

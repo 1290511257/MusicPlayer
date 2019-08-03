@@ -8,40 +8,10 @@
         android:layout_height="match_parent"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/tv_def"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_def" />
-
-        <SeekBar
-            android:id="@+id/seekbar_def"
-            android:layout_width="620px"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="10"
-            />
-
-        <TextView
-            android:id="@+id/tv_self"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_self" />
-
-
-        <SeekBar
-            android:id="@+id/seekbar_self"
-            android:layout_width="620px"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="20"
-            android:progressDrawable="@drawable/bg_bar"
-            android:thumb="@drawable/thumb_bar" />
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -15,7 +15,7 @@ import android.telephony.PhoneStateListener;
 import android.util.Log;
 
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
-import com.mbwr.xx.littlerubbishmusicplayer.activity.PlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
@@ -31,7 +31,7 @@ import java.util.TimerTask;
 public class MusicPlayerManager extends Service {
 
     private MusicApp musicApp;
-    private static PhoneStateListener phoneStateListener;
+    private static PhoneStateListener mPhoneStateListener;
     private static MusicPlayerManager musicPlayerManager;
     private static MediaPlayer mediaPlayer;
     private static MusicReceiver musicReceiver;
@@ -39,7 +39,8 @@ public class MusicPlayerManager extends Service {
     private static TimerTask task;
     private int msg;
 
-    private Album album;//歌单
+    private List<Album> mAlbums;
+    private Album mAlbum;//歌单
     private static List<Song> songList;//歌曲播放列表
     private String path = "/storage/emulated/0/Music/蔡健雅+-+紫.mp3";//当前歌曲路径
 
@@ -133,13 +134,13 @@ public class MusicPlayerManager extends Service {
 
         //测试数据
         songList = new ArrayList<>();
-        Song song = new Song("歌曲名", "歌手名", album, "/storage/emulated/0/Music/蔡健雅+-+紫.mp3", "/storage/emulated/0/Music/蔡健雅+-+紫.mp3");
+        Song song = new Song("歌曲名", "歌手名", 0, mAlbums, "/storage/emulated/0/Music/蔡健雅+-+紫.mp3", "/storage/emulated/0/Music/蔡健雅+-+紫.mp3");
         songList.add(song);
         currentSong = 0;
         lastPosition = 0;
-        album = new Album();
-        album.setName("陈奕迅专辑.");
-        album.setSongs(songList);
+        mAlbum = new Album();
+        mAlbum.setName("陈奕迅专辑.");
+        mAlbum.setSongs(songList);
         //end
 
         //
@@ -225,8 +226,6 @@ public class MusicPlayerManager extends Service {
                 }
                 break;
         }
-
-        path = getPath();
         resetMediaPlayer();
         play();
     }
@@ -244,12 +243,15 @@ public class MusicPlayerManager extends Service {
     /**
      * @author xuxiong
      * @time 7/28/19  9:08 PM
-     * @describe 更新当前播放歌单
+     * @describe 更新当前播放歌单和播放歌曲
      */
-    private void updateAlbum() {
+    private void updatePlayAlbum(int mAlbumPosition, int mSongPosition) {
+        if ((mAlbums.size() - mAlbumPosition) > 0) {
+            mAlbum = mAlbums.get(mAlbumPosition);
+            currentSong = mSongPosition;
+        } else {
 
-        //更新歌曲位置信息
-
+        }
     }
 
     /**
@@ -300,7 +302,11 @@ public class MusicPlayerManager extends Service {
         }
     }
 
-    //继续播放
+    /**
+     * @author xuxiong
+     * @time 8/3/19  3:32 AM
+     * @describe 继续播放当前音乐
+     */
     private void resume() {
         if (!mediaPlayer.isPlaying()) {
             play();
@@ -327,7 +333,7 @@ public class MusicPlayerManager extends Service {
         bundle.putInt("currentPosition", currentPosition);
         bundle.putInt("duration", duration);
         msg.setData(bundle);
-        PlayActivity.playHandler.sendMessage(msg);
+        MusicPlayActivity.playHandler.sendMessage(msg);
 
         //BoardCast
         Intent intent = new Intent(UPDATE_MUSIC_INFO);
@@ -362,7 +368,7 @@ public class MusicPlayerManager extends Service {
         bundle.putInt("playMode", playMode);
         bundle.putBoolean("playStatu", isPlaying);
         msg.setData(bundle);
-        PlayActivity.playHandler.sendMessage(msg);
+        MusicPlayActivity.playHandler.sendMessage(msg);
 
         //BoardCast
         Intent intent = new Intent(UPDATE_MODE_STATUS);
@@ -394,7 +400,7 @@ public class MusicPlayerManager extends Service {
                 Bundle bundle = new Bundle(); //map
                 bundle.putInt("currentPosition", currentPosition);
                 msg.setData(bundle);
-                PlayActivity.playHandler.sendMessage(msg);
+                MusicPlayActivity.playHandler.sendMessage(msg);
 
                 //BoardCast
                 Intent intent = new Intent(UPDATE_PROGRESS);
@@ -497,8 +503,8 @@ public class MusicPlayerManager extends Service {
         //更新歌单
         @Override
         public void UpdateAlbum(Album t_album) {
-            album = t_album;
-            songList = album.getSongs();
+            mAlbum = t_album;
+            songList = mAlbum.getSongs();
 
         }
 
@@ -523,18 +529,17 @@ public class MusicPlayerManager extends Service {
         }
     }
 
-
     /**
      * @author xuxiong
      * @time 7/28/19  8:00 PM
      * @describe mediaPlayer初始化, 以及播放界面歌曲信息更新
      */
     private void resetMediaPlayer() {
-
-        Song song = songList.get(currentSong);
         mediaPlayer.reset();//恢复初始化
         try {
-            mediaPlayer.setDataSource(song.getFilePath());
+            if (mAlbum != null && currentSong >= 0 && (songList.size() - currentSong) > 0) {
+                mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());
+            }
             mediaPlayer.prepare();//缓冲音乐
         } catch (IOException e) {
             Log.i(TAG, e.toString());
@@ -545,10 +550,4 @@ public class MusicPlayerManager extends Service {
         updatePlayModeOrPlayStatus();
     }
 
-    private String getPath() {
-        if (album != null && currentSong != (-1)) {
-            return songList.get(currentSong).getFilePath();
-        }
-        return null;
-    }
 }
