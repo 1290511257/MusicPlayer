@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MusicListAdapter extends BaseAdapter {
+public class MusicSearchListAdapter extends BaseAdapter {
 
-    private static final String TAG = MusicListAdapter.class.getSimpleName();
+    private static final String TAG = MusicSearchListAdapter.class.getSimpleName();
 
     private List<Song> mSongList;
 
@@ -26,7 +26,7 @@ public class MusicListAdapter extends BaseAdapter {
 
     public static Map<Integer, Boolean> isSelected;
 
-    public MusicListAdapter(Context context) {
+    public MusicSearchListAdapter(Context context) {
         this.mInflater = LayoutInflater.from(context);
     }
 

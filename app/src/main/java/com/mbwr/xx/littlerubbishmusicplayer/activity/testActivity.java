@@ -8,6 +8,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ListView;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.zhy.adapter.recyclerview.CommonAdapter;

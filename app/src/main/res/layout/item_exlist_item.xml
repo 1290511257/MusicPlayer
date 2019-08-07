@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:orientation="horizontal"
+    android:background="@color/colorWhite">
+
+    <ImageView
+        android:id="@+id/album_img_icon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:focusable="false"/>
+
+    <TextView
+        android:id="@+id/album_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:maxLines="1"
+        android:textSize="25sp" />
+
+</LinearLayout>

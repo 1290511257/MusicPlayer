@@ -1,7 +1,6 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -9,6 +8,7 @@ import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -21,7 +21,7 @@ import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.adapter.MusicListAdapter;
+import com.mbwr.xx.littlerubbishmusicplayer.adapter.MusicSearchListAdapter;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.FileUtils;
@@ -32,7 +32,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class MusicSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnTouchListener {
 
     private static final String TAG = MusicSearchActivity.class.getSimpleName();
     private TextView thepath, seaching, head, allchoose;
@@ -40,7 +40,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
     private ImageView mOutLocal;
     private Button mBeginSearch, mSureAdd;
     private ListView mSongList;
-    private MusicListAdapter musicAdapter;
+    private MusicSearchListAdapter musicAdapter;
 
     private MusicApp musicApp;
     private boolean mSelectAll = false;
@@ -101,7 +101,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         mSongList = findViewById(R.id.show_music);//获取list列表
         allchoose = findViewById(R.id.allchoose);
         mAddedSongList = musicApp.getLocalMusic();
-        musicAdapter = new MusicListAdapter(this);//list适配器
+        musicAdapter = new MusicSearchListAdapter(this);//list适配器
         musicAdapter.setList(mCanAddSongList);
         mSongList.setAdapter(musicAdapter);//绑定适配器
         mSongList.setOnItemClickListener(this);
@@ -111,7 +111,6 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         mSureAdd.setEnabled(false);//先设定为不可选
         allchoose.setOnClickListener(this);
 
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -119,7 +118,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
+                Intent intent = new Intent(getApplicationContext(), MusicPlayActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -168,10 +167,25 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MusicListAdapter.ViewHolder vHolder = (MusicListAdapter.ViewHolder) view.getTag();
+        MusicSearchListAdapter.ViewHolder vHolder = (MusicSearchListAdapter.ViewHolder) view.getTag();
         vHolder.vCheckBox.toggle();
-        MusicListAdapter.isSelected.put(position, vHolder.vCheckBox.isChecked());
+        MusicSearchListAdapter.isSelected.put(position, vHolder.vCheckBox.isChecked());
     }
+
+    /**
+     * Called when a touch event is dispatched to a view. This allows listeners to
+     * get a chance to respond before the target view.
+     *
+     * @param v     The view the touch event has been dispatched to.
+     * @param event The MotionEvent object containing full information about
+     *              the event.
+     * @return True if the listener has consumed the event, false otherwise.
+     */
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return false;
+    }
+
 
     /**
      * @author xuxiong
@@ -201,6 +215,11 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
 
         List<String> filesPath = FileUtils.getTargetTypeFiles(rootDirPath, false, "mp3");
         if (filesPath.size() == 0) return;
+
+        List<Album> albumList = new ArrayList<>();//默认添加歌单
+        Album album = LitePal.find(Album.class, 1);
+        albumList.add(album);
+
         for (String path : filesPath) {//单个mp3文件处理
             File mp3File = new File(path);
             long mSize = mp3File.length();
@@ -217,8 +236,6 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
                 }
             }
             if (isExist) continue;
-            List<Album> albumList = new ArrayList<>();
-            albumList.add(LitePal.find(Album.class, 1));
             mCanAddSongList.add(new Song(songName, singerName, mSize, albumList, mp3File.getAbsolutePath(), null));
         }
     }
@@ -244,8 +261,8 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
      * @describe 添加新歌曲
      */
     private void progressSelectedSongs() {
-        for (int songPosition = 0; songPosition < MusicListAdapter.isSelected.size(); songPosition++) {
-            if (MusicListAdapter.isSelected.get(songPosition)) {//过滤非选择歌曲
+        for (int songPosition = 0; songPosition < MusicSearchListAdapter.isSelected.size(); songPosition++) {
+            if (MusicSearchListAdapter.isSelected.get(songPosition)) {//过滤非选择歌曲
                 progressOneSelectedSong(songPosition);
             }
         }
@@ -272,7 +289,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         int tempIndex = sampleFileName.indexOf("-");//null = -1
         if (tempIndex == -1) {//未检测到分隔符
             info.add(sampleFileName.trim());
-            info.add(null);
+            info.add("未知");
             return info;
         }
         info.add(sampleFileName.substring(tempIndex + 1).trim());
@@ -281,22 +298,22 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
     }
 
     /**
-     *  @author xuxiong
-     *  @time 8/3/19  2:57 AM
-     *  @describe 全选/取消全选
+     * @author xuxiong
+     * @time 8/3/19  2:57 AM
+     * @describe 全选/取消全选
      */
-    private void allSelectChanges(){
+    private void allSelectChanges() {
         if (mSelectAll) {
             allchoose.setText("全选");
             mSelectAll = false;
             for (int i = 0; i < mCanAddSongList.size(); i++) {
-                MusicListAdapter.isSelected.put(i, false);
+                MusicSearchListAdapter.isSelected.put(i, false);
             }
         } else {
             allchoose.setText("取消全选");
             mSelectAll = true;
             for (int i = 0; i < mCanAddSongList.size(); i++) {
-                MusicListAdapter.isSelected.put(i, true);
+                MusicSearchListAdapter.isSelected.put(i, true);
             }
         }
         musicAdapter.notifyDataSetChanged();

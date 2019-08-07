@@ -29,4 +29,9 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
+    <style name="PopuWindow_stale">
+        <item name="android:windowEnterAnimation">@anim/translate_in</item>
+        <item name="android:windowExitAnimation">@anim/translate_out</item>
+    </style>
+
 </resources>

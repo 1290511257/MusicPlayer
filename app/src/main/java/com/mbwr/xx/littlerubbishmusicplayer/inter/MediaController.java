@@ -22,11 +22,13 @@ public interface MediaController {
 
     void UpdateAlbum(Album album);
 
-    void UpdatePlayMode(int i);
+    void UpdatePlayMode();
 
     void StartTimeTask();
 
     void StopTimeTask();
 
     void UpdateSongInfo();
+
+    boolean RemoveSong(int position);
 }

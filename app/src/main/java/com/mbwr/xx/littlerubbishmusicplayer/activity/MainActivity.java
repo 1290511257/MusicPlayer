@@ -1,12 +1,17 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -17,7 +22,6 @@ import android.view.Menu;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
 
-import org.litepal.LitePal;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -27,6 +31,8 @@ public class MainActivity extends BaseActivity
     private static String[] PERMISSIONS_STORAGE = {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE"};
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +47,6 @@ public class MainActivity extends BaseActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-
         //phoneListenerService启动
         Intent intent = new Intent(this, PhoneListenerService.class);
         startService(intent);
@@ -51,10 +56,17 @@ public class MainActivity extends BaseActivity
 
         //打开播放界面
 //        Intent intent1 = new Intent(this, MusicPlayActivity.class);
-        Intent intent1 = new Intent(this, MusicSearchActivity.class);
-        startActivity(intent1);
+        Intent intent1 = new Intent(this, MusicPlayActivity.class);
+//        startActivity(intent1);
+
 
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -96,10 +108,11 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            Intent intent = new Intent(this,MusicSearchActivity.class);
+            Intent intent = new Intent(this, MusicSearchActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_gallery) {
-
+            Intent intent = new Intent(this, MusicPlayActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_tools) {
@@ -121,7 +134,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
     }
 

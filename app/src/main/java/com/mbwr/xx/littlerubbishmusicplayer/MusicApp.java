@@ -1,5 +1,10 @@
 package com.mbwr.xx.littlerubbishmusicplayer;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
@@ -11,15 +16,19 @@ import org.litepal.LitePalApplication;
 import org.litepal.tablemanager.callback.DatabaseListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MusicApp extends LitePalApplication {
 
     private static String TAG = MusicApp.class.getName();
 
     private List<Song> localMusic;//所有音乐
-
     private List<Album> localAlbum;//所有歌单
+    public static Map<String, Long> playInfo;
+
+    public static IMusicAidlInterface iMusicAidlInterface;
 
     public void setLocalMusic(List<Song> songs) {
         this.localMusic = new ArrayList<>();
@@ -63,11 +72,55 @@ public class MusicApp extends LitePalApplication {
 //        LitePal.deleteAll(Album.class);
 //        LitePal.deleteAll(Song.class);
 
+//        Album album = LitePal.(Album.class, 1);
+//        List<Song> songList = album.getSongs();
         localAlbum = LitePal.findAll(Album.class);
         localMusic = LitePal.findAll(Song.class);
+
+//        DaoOperator daoOperator = new DaoOperator();
+//        daoOperator.getAlbumById(1);
+        getPlayInfo();
 
         Utils.init(this);
     }
 
+    /**
+     * @author xuxiong
+     * @time 8/6/19  11:06 PM
+     * @describe 获取上次播放歌曲信息
+     */
+    private void getPlayInfo() {
 
+
+        Intent intent2 = new Intent();
+        intent2.setAction("com.mbwr.xx.myapplication.ProviderInfoService.RemoteBinder");
+        intent2.setPackage("com.mbwr.xx.myapplication");
+        bindService(intent2, new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.i("AIDL", "------------->connected");
+                iMusicAidlInterface = IMusicAidlInterface.Stub.asInterface(service);
+                try {
+                    long albumId = iMusicAidlInterface.getAlbumId();
+                    long songId = iMusicAidlInterface.getSongId();
+                    long playMode = iMusicAidlInterface.getPlayMode();
+                    if (albumId != -1 && songId != -1 && playMode != -1) {
+                        playInfo = new HashMap<>();
+                        playInfo.put("albumId", albumId);
+                        playInfo.put("songId", songId);
+                        playInfo.put("playMode", playMode);
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        }, BIND_AUTO_CREATE);
+    }
 }

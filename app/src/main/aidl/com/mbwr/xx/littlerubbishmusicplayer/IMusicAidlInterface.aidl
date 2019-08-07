@@ -10,4 +10,10 @@ interface IMusicAidlInterface {
      */
     void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
             double aDouble, String aString);
+
+    long getAlbumId();
+    long getSongId();
+    long getPlayMode();
+
+    void setPlayInfo(long albumId,long songId,long playMode);
 }

@@ -3,18 +3,27 @@ package com.mbwr.xx.littlerubbishmusicplayer.activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -22,26 +31,32 @@ import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
+import com.zhy.adapter.recyclerview.CommonAdapter;
+import com.zhy.adapter.recyclerview.base.ViewHolder;
+
+import java.util.Map;
 
 public class MusicPlayActivity extends BaseActivity implements View.OnClickListener {
-
-    private static ImageView mBackAlbum, mPlayingMode, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal;
-    private static TextView mTimePlayed, mDuration, mSongName, mSingerName;
-    private static SeekBar mProgress;
+    private static final String TAG = MusicPlayActivity.class.getSimpleName();
+    private static ImageView mBackAlbum, mPlayModeImage, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal, mPopPlayModeImage, mPopRemoveAll;
+    private static TextView mTimePlayed, mDuration, mSongName, mSingerName, mPopPlayModeText, mPopWindowClose, mTryGetLrc;
+    private static SeekBar mProgress, mVolumeSeek;
 
     private Toolbar toolbar;
     private FrameLayout mAlbumLayout;
     private RelativeLayout mLrcViewContainer;
-    private TextView mTryGetLrc;
     private LinearLayout mMusicTool;
-    private SeekBar mVolumeSeek;
 
-    private int playMode = 0;
+    private CommonAdapter<Song> mAdapter;
+    private RecyclerView mRecyclerView;
+
+    private static int mPlayMode = 0;
     private boolean isPlaying = false;
 
-    private String TAG = MusicPlayActivity.class.getSimpleName();
+    private int mOldPosition, mNewPosition;
 
     private MusicServiceConnection connection;
     private MediaController mediaController;
@@ -74,24 +89,25 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                     mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
                     break;
                 case 2:
-                    int playMode = msg.getData().getInt("playMode");
+                    mPlayMode = msg.getData().getInt("playMode") - 1;
                     boolean isPlaying = msg.getData().getBoolean("playStatu");
-                    switch (playMode - 1) {
+                    switch (mPlayMode) {
                         case 0:
-                            mPlayingMode.setImageResource(R.drawable.play_icn_loop);
+                            mPlayModeImage.setImageResource(R.drawable.play_icn_loop);
                             break;
                         case 1:
-                            mPlayingMode.setImageResource(R.drawable.play_icn_shuffle);
+                            mPlayModeImage.setImageResource(R.drawable.play_icn_shuffle);
                             break;
                         case 2:
-                            mPlayingMode.setImageResource(R.drawable.play_icn_one);
+                            mPlayModeImage.setImageResource(R.drawable.play_icn_one);
                             break;
                     }
-                    if(isPlaying){
+                    if (isPlaying) {
                         mControl.setImageResource(R.drawable.play_rdi_btn_play);
-                    }else {
+                    } else {
                         mControl.setImageResource(R.drawable.play_rdi_btn_pause);
                     }
+                    updatePupPlayModeInfo();
                     break;
             }
         }
@@ -108,7 +124,6 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_playing);
-
 
         toolbar = findViewById(R.id.toolbar);
 
@@ -131,7 +146,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         //返回
         mOutLocal = findViewById(R.id.out_local);
         //播放模式
-        mPlayingMode = findViewById(R.id.playing_mode);
+        mPlayModeImage = findViewById(R.id.playing_mode);
         //播放&暂停
         mControl = findViewById(R.id.playing_play);
         //下一曲
@@ -179,20 +194,16 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         //调用bindservice 获取定义的中间人对象  就可以通过mediaController间接的调用服务里面的方法
         connection = new MusicServiceConnection();
         bindService(intent, connection, BIND_AUTO_CREATE);
+
         //注册点击事件
         mOutLocal.setOnClickListener(this);
-        mPlayingMode.setOnClickListener(this);
+        mPlayModeImage.setOnClickListener(this);
         mControl.setOnClickListener(this);
         mNext.setOnClickListener(this);
         mPre.setOnClickListener(this);
         mPlaylist.setOnClickListener(this);
         mDown.setOnClickListener(this);
         Log.i(TAG, "onCreate");
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
     }
 
     @Override
@@ -214,23 +225,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                 finish();
                 break;
             case R.id.playing_mode:
-                playMode++;
-                playMode = playMode > 2 ? 0 : playMode;
-                mediaController.UpdatePlayMode(playMode + 1);
-                switch (playMode) {
-                    case 0:
-                        mPlayingMode.setImageResource(R.drawable.play_icn_loop);
-                        Toast.makeText(this, "循环播放", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 1:
-                        mPlayingMode.setImageResource(R.drawable.play_icn_shuffle);
-                        Toast.makeText(this, "随机播放", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 2:
-                        mPlayingMode.setImageResource(R.drawable.play_icn_one);
-                        Toast.makeText(this, "单曲循环", Toast.LENGTH_SHORT).show();
-                        break;
-                }
+                playModeChange();
                 break;
             case R.id.playing_play:
                 if (isPlaying) {
@@ -255,6 +250,39 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                 break;
             case R.id.playing_playlist:
                 //显示当前歌单列表
+                showPopuWindow();
+                break;
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 8/5/19  9:13 PM
+     * @describe 更改播放模式
+     */
+    private void playModeChange() {
+        mediaController.UpdatePlayMode();
+    }
+
+    /**
+     * @author xuxiong
+     * @time 8/5/19  9:49 PM
+     * @describe 更新播放列表界面播放模式资源
+     */
+    private static void updatePupPlayModeInfo() {
+        if (mPopPlayModeImage == null || mPopPlayModeText == null) return;
+        switch (mPlayMode) {
+            case 0:
+                mPopPlayModeImage.setImageResource(R.mipmap.xunhuan);
+                mPopPlayModeText.setText("顺序播放");
+                break;
+            case 1:
+                mPopPlayModeImage.setImageResource(R.mipmap.radommusic);
+                mPopPlayModeText.setText("随机播放");
+                break;
+            case 2:
+                mPopPlayModeImage.setImageResource(R.mipmap.onemusic);
+                mPopPlayModeText.setText("单曲循环");
                 break;
         }
     }
@@ -277,4 +305,116 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         }
 
     }
+
+    /**
+     * @author xuxiong
+     * @time 8/5/19  1:56 AM
+     * @describe 显示音乐播放列表的PopuWindow
+     */
+    public void showPopuWindow() {
+
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_song_list, null);
+        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        mRecyclerView = view.findViewById(R.id.pop_recyclerView);
+        mPopPlayModeText = view.findViewById(R.id.pop_play_mode_text);
+        mPopPlayModeImage = view.findViewById(R.id.pop_play_mode_change_image);
+        mPopWindowClose = view.findViewById(R.id.pop_play_list_close);
+        mPopRemoveAll = view.findViewById(R.id.pop_remove);
+        mNewPosition = MusicPlayerManager.currentSong;
+
+        updatePupPlayModeInfo();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(MusicPlayActivity.this));
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));//栅格布局,每行显示3个item
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(MusicPlayActivity.this, DividerItemDecoration.VERTICAL));
+        mAdapter = new CommonAdapter<Song>(this, R.layout.music_play_list_recyclerview_layout, MusicPlayerManager.songList) {
+            @Override
+            protected void convert(ViewHolder holder, Song s, int position) {
+                holder.setText(R.id.song_info_songName, s.getName());
+                holder.setText(R.id.song_info_singerName, s.getSinger());
+
+                if (position == mNewPosition) {//当前播放歌曲设置
+                    holder.setVisible(R.id.pop_play_status_image,true);
+                    holder.setImageResource(R.id.pop_play_status_image,R.drawable.song_play_icon);
+                    holder.setTextColorRes(R.id.song_info_songName, R.color.colorAccent);
+                    holder.setTextColorRes(R.id.song_info_singerName, R.color.colorAccent);
+                    holder.setTextColorRes(R.id.dividing_line, R.color.colorAccent);
+                }else {
+                    holder.setVisible(R.id.pop_play_status_image,false);
+                    holder.setTextColorRes(R.id.song_info_songName, R.color.colorBlack);
+                    holder.setTextColorRes(R.id.song_info_singerName, R.color.colorBlack);
+                    holder.setTextColorRes(R.id.dividing_line, R.color.colorBlack);
+                }
+            }
+        };
+        mAdapter.setOnItemClickListener(new CommonAdapter.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(View view, RecyclerView.ViewHolder holder, int position) {
+                mediaController.CallPlay(position);
+                mOldPosition = mNewPosition;
+                mNewPosition = position;
+                mAdapter.notifyItemChanged(mOldPosition);
+                mAdapter.notifyItemChanged(mNewPosition);
+//                popupWindow.dismiss();
+            }
+
+            @Override
+            public boolean onItemLongClick(View view, RecyclerView.ViewHolder holder, int position) {
+                if (mediaController.RemoveSong(position)) {
+                    mAdapter.notifyItemRemoved(position);
+                }
+                return true;
+            }
+        });
+        mRecyclerView.setAdapter(mAdapter);
+
+        mPopPlayModeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaController.UpdatePlayMode();
+            }
+        });
+        mPopPlayModeText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaController.UpdatePlayMode();
+            }
+        });
+        mPopWindowClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+        //移除所有歌曲
+        mPopRemoveAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Toast.makeText(this,)
+            }
+        });
+
+        //PopuWindow
+        popupWindow.setContentView(view);
+        popupWindow.setAnimationStyle(R.style.PopuWindow_stale);
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        layoutParams.alpha = 0.8f;//设置背景透明度
+        getWindow().setAttributes(layoutParams);
+        //设置点击外部消失
+        popupWindow.setOutsideTouchable(true);
+        //窗口消失事件
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams layoutParams1 = getWindow().getAttributes();
+                layoutParams1.alpha = 1f;
+                getWindow().setAttributes(layoutParams1);
+            }
+        });
+        //显示控件
+        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+    }
+
+
 }

@@ -13,6 +13,7 @@ import android.widget.RemoteViews;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
@@ -27,11 +28,9 @@ public class ListWidgetProvider extends AppWidgetProvider {
     public static final String LAST_MUSIC = "com.mbwr.xx.LAST_MUSIC";
     public static final String PLAY_MUSIC = "com.mbwr.xx.PLAY_MUSIC";
 
-    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
-    public static final String UPDATE_PROGRESS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
-    public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
-
-    public static final String COLLECTION_VIEW_EXTRA = "com.oitsme.COLLECTION_VIEW_EXTRA";
+    public static final String UPDATE_MUSIC_INFO = MusicPlayerManager.UPDATE_MUSIC_INFO;  //更新音乐基本信息
+    public static final String UPDATE_PROGRESS = MusicPlayerManager.UPDATE_PROGRESS;
+    public static final String UPDATE_MODE_STATUS = MusicPlayerManager.UPDATE_MODE_STATUS;
 
     private static int mProgressMax,playMode;
 

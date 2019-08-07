@@ -2,33 +2,55 @@ package com.mbwr.xx.littlerubbishmusicplayer.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.util.Log;
 
+import com.mbwr.xx.littlerubbishmusicplayer.IMusicAidlInterface;
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
+import com.mbwr.xx.littlerubbishmusicplayer.dao.DaoOperator;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
+import com.mbwr.xx.littlerubbishmusicplayer.widget.ListWidgetProvider;
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MusicPlayerManager extends Service {
+
+    private static final String TAG = MusicPlayerManager.class.getSimpleName();
+
+    //广播
+    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
+    public static final String UPDATE_PROGRESS = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
+    public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
+
+    public static final String PLAY_MODE = ListWidgetProvider.PLAY_MODE;
+    public static final String NEXT_MUSIC = ListWidgetProvider.NEXT_MUSIC;
+    public static final String LAST_MUSIC = ListWidgetProvider.LAST_MUSIC;
+    public static final String PLAY_MUSIC = ListWidgetProvider.PLAY_MUSIC;
 
     private MusicApp musicApp;
     private static PhoneStateListener mPhoneStateListener;
@@ -39,29 +61,16 @@ public class MusicPlayerManager extends Service {
     private static TimerTask task;
     private int msg;
 
-    private List<Album> mAlbums;
-    private Album mAlbum;//歌单
-    private static List<Song> songList;//歌曲播放列表
-    private String path = "/storage/emulated/0/Music/蔡健雅+-+紫.mp3";//当前歌曲路径
+    //    private List<Album> mAlbums;
+    private static Album mAlbum;//歌单
+    public static List<Song> songList;//歌曲播放列表
 
     //是否正在播放
     private static boolean isPlaying = false;
     private static int playMode = 1;//播放顺序: 1顺序循环 2随机循环 3单曲循环
 
-    private static int currentSong = -1;
+    public static int currentSong = -1;
     private int lastPosition = -1;
-
-    private static String TAG = MusicPlayerManager.class.getSimpleName();
-
-    //广播
-    public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
-    public static final String UPDATE_PROGRESS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
-    public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
-
-    public static final String PLAY_MODE = "com.mbwr.xx.PLAY_MODE";
-    public static final String NEXT_MUSIC = "com.mbwr.xx.NEXT_MUSIC";
-    public static final String LAST_MUSIC = "com.mbwr.xx.LAST_MUSIC";
-    public static final String PLAY_MUSIC = "com.mbwr.xx.PLAY_MUSIC";
 
     public static Handler phoneListenerHander = new Handler() {
         /**
@@ -132,39 +141,41 @@ public class MusicPlayerManager extends Service {
         intentFilter.addAction(PLAY_MUSIC);
         registerReceiver(musicReceiver, intentFilter);
 
-        //测试数据
-        songList = new ArrayList<>();
-        Song song = new Song("歌曲名", "歌手名", 0, mAlbums, "/storage/emulated/0/Music/蔡健雅+-+紫.mp3", "/storage/emulated/0/Music/蔡健雅+-+紫.mp3");
-        songList.add(song);
-        currentSong = 0;
-        lastPosition = 0;
-        mAlbum = new Album();
-        mAlbum.setName("陈奕迅专辑.");
-        mAlbum.setSongs(songList);
-        //end
-
-        //
-        mediaPlayer.reset();//恢复初始化
-        try {
-            mediaPlayer.setDataSource(song.getFilePath());
-            mediaPlayer.prepare();//缓冲音乐
-        } catch (IOException e) {
-            Log.i(TAG, e.toString());
-        }
-        isPlaying = mediaPlayer.isPlaying();
-        //
-
-
-        //设定音乐播放完成监听事件
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Log.i(TAG, "音乐播放完成.");
-                nextMusic();
+        if (InitMusicInfo()) {
+            mediaPlayer.reset();//恢复初始化
+            try {
+                if (songList.size() > 0) {
+                    mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());//  song.getFilePath());
+                    mediaPlayer.prepare();//缓冲音乐
+                }
+            } catch (IOException e) {
+                Log.e(TAG, e.toString());
             }
-        });
+            isPlaying = mediaPlayer.isPlaying();
 
+            //设定音乐播放完成监听事件
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    Log.i(TAG, "音乐播放完成.");
+                    nextMusic();
+                }
+            });
+
+            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                //在media初始化后但并未设置资源时调用某些方法可能会触发此异常异监听
+                //有些异常可能会触发音乐播放完成事件,设置ErrorListener后可以阻塞相应异常事件触发,如:OnCompletionListener
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Log.i(TAG, "OnErrorListener:" + what + "," + extra);
+                    return true;
+                }
+            });
+        } else {//缺少播放歌曲信息,启动歌单列表界面
+            Log.i(TAG, "缺少播放歌曲信息,启动歌单列表界面");
+//            new Intent()
+        }
     }
 
     @Override
@@ -187,82 +198,19 @@ public class MusicPlayerManager extends Service {
 
     /**
      * @author xuxiong
-     * @time 7/28/19  9:03 PM
-     * @describe 播放上一首歌曲
-     */
-    private void lastMusic() {
-
-    }
-
-    /**
-     * @author xuxiong
-     * @time 7/28/19  9:04 PM
-     * @describe 播放下一首歌曲
-     */
-    private void nextMusic() {
-
-        int length = songList.size();
-        switch (playMode) {
-            case 1://顺序播放
-                currentSong += 1;
-                if (currentSong > length - 1) {
-                    currentSong = 0;
-                }
-                break;
-            case 2://随机播放
-                if (length > 1) {
-                    int cx = new Random().nextInt(length);
-                    while (cx == currentSong) {
-                        cx = new Random().nextInt(length);
-                    }
-                    lastPosition = currentSong;
-                    currentSong = cx;
-                }
-                break;
-            case 3:
-                currentSong += 1;
-                if (currentSong > length - 1) {
-                    currentSong = 0;
-                }
-                break;
-        }
-        resetMediaPlayer();
-        play();
-    }
-
-    /**
-     * @author xuxiong
-     * @time 7/28/19  9:04 PM
-     * @describe 重新播放当前歌曲
-     */
-    private void currentMusic() {
-        resetMediaPlayer();
-        play();
-    }
-
-    /**
-     * @author xuxiong
-     * @time 7/28/19  9:08 PM
-     * @describe 更新当前播放歌单和播放歌曲
-     */
-    private void updatePlayAlbum(int mAlbumPosition, int mSongPosition) {
-        if ((mAlbums.size() - mAlbumPosition) > 0) {
-            mAlbum = mAlbums.get(mAlbumPosition);
-            currentSong = mSongPosition;
-        } else {
-
-        }
-    }
-
-    /**
-     * @author xuxiong
      * @time 7/28/19  9:11 PM
      * @describe 开始播放歌曲
      */
     private static void play() {
         if (!mediaPlayer.isPlaying()) {
+            Log.i(TAG, "play start");
             mediaPlayer.start();
             isPlaying = mediaPlayer.isPlaying();
+            try {
+                MusicApp.iMusicAidlInterface.setPlayInfo(mAlbum.getId(), currentSong, playMode);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             startTimeTask();
             updateSongInfo();
             updatePlayModeOrPlayStatus();
@@ -313,14 +261,92 @@ public class MusicPlayerManager extends Service {
         }
     }
 
+    /**
+     * @author xuxiong
+     * @time 7/28/19  9:03 PM
+     * @describe 播放上一首歌曲
+     */
+    private void lastMusic() {
+
+    }
+
+    /**
+     * @author xuxiong
+     * @time 7/28/19  9:04 PM
+     * @describe 播放下一首歌曲
+     */
+    private void nextMusic() {
+
+        int length = songList.size();
+        switch (playMode) {
+            case 1://顺序播放
+                currentSong += 1;
+                if (currentSong > length - 1) {
+                    currentSong = 0;
+                }
+                break;
+            case 2://随机播放
+                if (length > 1) {
+                    int cx = new Random().nextInt(length);
+                    while (cx == currentSong) {
+                        cx = new Random().nextInt(length);
+                    }
+                    lastPosition = currentSong;
+                    currentSong = cx;
+                }
+                break;
+            case 3:
+                break;
+        }
+        stopTimeTask();
+        resetMediaPlayer();
+        play();
+
+    }
+
+    /**
+     * @author xuxiong
+     * @time 7/28/19  9:04 PM
+     * @describe 重新播放当前歌曲
+     */
+    private void currentMusic() {
+        stopTimeTask();
+        resetMediaPlayer();
+        play();
+    }
+
+    /**
+     * @author xuxiong
+     * @time 7/28/19  9:08 PM
+     * @describe 更新当前播放歌单和播放歌曲
+     */
+    private void updatePlayAlbum(int mAlbumPosition, int mSongPosition) {
+        if ((musicApp.getLocalAlbum().size() - mAlbumPosition) > 0) {
+            mAlbum = musicApp.getLocalAlbum().get(mAlbumPosition);
+            currentSong = mSongPosition;
+        } else {
+
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 8/5/19  9:21 PM
+     * @describe 更改循环模式
+     */
+    private void playModeChange() {
+        playMode = (playMode % 3) + 1;
+        updatePlayModeOrPlayStatus();
+    }
 
     /**
      * @author xuxiong
      * @time 7/26/19  4:07 AM
-     * @describe 更新歌曲基本信息显示
+     * @describe 更新显示界面歌曲基本信息
      */
     private static void updateSongInfo() {
 
+        if (songList == null || songList.size() <= currentSong) return;
         Song song = songList.get(currentSong);
         int duration = mediaPlayer.getDuration();
         int currentPosition = mediaPlayer.getCurrentPosition();
@@ -434,8 +460,7 @@ public class MusicPlayerManager extends Service {
             Log.i("MusicReceiver", "onReceiver,action" + action);
             switch (action) {
                 case PLAY_MODE:
-                    playMode = (playMode % 3) + 1;
-                    updatePlayModeOrPlayStatus();
+                    playModeChange();
                     break;
                 case LAST_MUSIC:
                     lastMusic();
@@ -477,6 +502,8 @@ public class MusicPlayerManager extends Service {
         @Override
         public void CallPlay(int position) {
             currentSong = position;
+            resetMediaPlayer();
+            updateSongInfo();
             play();
         }
 
@@ -509,9 +536,8 @@ public class MusicPlayerManager extends Service {
         }
 
         @Override
-        public void UpdatePlayMode(int i) {
-            playMode = i;
-            updatePlayModeOrPlayStatus();
+        public void UpdatePlayMode() {
+            playModeChange();
         }
 
         @Override
@@ -527,6 +553,21 @@ public class MusicPlayerManager extends Service {
         @Override
         public void UpdateSongInfo() {
         }
+
+        @Override
+        public boolean RemoveSong(int position) {
+            return removeSong(position);
+        }
+    }
+
+    private boolean removeSong(int position) {
+        if (LitePal.delete(Song.class, songList.get(position).getId()) > 0) {
+            songList.remove(position);
+            mAlbum.setSongs(songList);
+            mAlbum.save();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -539,10 +580,11 @@ public class MusicPlayerManager extends Service {
         try {
             if (mAlbum != null && currentSong >= 0 && (songList.size() - currentSong) > 0) {
                 mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());
+                Log.i(TAG, songList.get(currentSong).getName());
             }
             mediaPlayer.prepare();//缓冲音乐
         } catch (IOException e) {
-            Log.i(TAG, e.toString());
+            Log.e(TAG, e.toString());
         }
         isPlaying = mediaPlayer.isPlaying();
 //        mediaPlayer.getTimestamp();
@@ -550,4 +592,28 @@ public class MusicPlayerManager extends Service {
         updatePlayModeOrPlayStatus();
     }
 
+    /**
+     * @author xuxiong
+     * @time 8/4/19  10:23 PM
+     * @describe 初始化设置歌曲信息
+     */
+    private boolean InitMusicInfo() {
+
+        Map<String, Long> map = MusicApp.playInfo;
+        if (map == null || map.size() == 0) return false;
+
+        DaoOperator daoOperator = new DaoOperator();
+
+        mAlbum = daoOperator.getAlbumById(map.get("albumId"));
+        songList = mAlbum.getSongs();
+
+        for (Song s : songList) {
+            if (s.getId() == map.get("songId")) currentSong = songList.indexOf(s);
+        }
+
+        playMode = map.get("playMode").intValue();
+
+        if (currentSong != -1 && playMode != -1 && songList != null && mAlbum != null) return true;
+        return false;
+    }
 }
