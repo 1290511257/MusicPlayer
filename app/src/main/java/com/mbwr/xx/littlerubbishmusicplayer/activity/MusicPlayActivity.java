@@ -3,8 +3,6 @@ package com.mbwr.xx.littlerubbishmusicplayer.activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -27,7 +25,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
@@ -36,8 +33,6 @@ import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
-
-import java.util.Map;
 
 public class MusicPlayActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = MusicPlayActivity.class.getSimpleName();
@@ -77,6 +72,8 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                     String singer = msg.getData().getString("singer");
                     int songTime = msg.getData().getInt("duration");
                     int timePlayed = msg.getData().getInt("currentPosition");
+                    if (mSongName == null || mSingerName == null || mProgress == null || mTimePlayed == null || mDuration == null)
+                        break;
                     mSongName.setText(songName);
                     mSingerName.setText(singer);
                     mTimePlayed.setText(TimeUtils.convertIntTime2String(timePlayed));
@@ -84,11 +81,13 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                     mProgress.setMax(songTime);
                     break;
                 case 1:
+                    if (mProgress == null || mTimePlayed == null) break;
                     int playedTime = msg.getData().getInt("currentPosition");
                     mProgress.setProgress(playedTime);
                     mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
                     break;
                 case 2:
+                    if (mPlayModeImage == null) break;
                     mPlayMode = msg.getData().getInt("playMode") - 1;
                     boolean isPlaying = msg.getData().getBoolean("playStatu");
                     switch (mPlayMode) {
@@ -313,7 +312,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
      */
     public void showPopuWindow() {
 
-        View view = LayoutInflater.from(this).inflate(R.layout.layout_song_list, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.popuwindow_song_list, null);
         final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mRecyclerView = view.findViewById(R.id.pop_recyclerView);
@@ -327,20 +326,20 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MusicPlayActivity.this));
 //        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));//栅格布局,每行显示3个item
         mRecyclerView.addItemDecoration(new DividerItemDecoration(MusicPlayActivity.this, DividerItemDecoration.VERTICAL));
-        mAdapter = new CommonAdapter<Song>(this, R.layout.music_play_list_recyclerview_layout, MusicPlayerManager.songList) {
+        mAdapter = new CommonAdapter<Song>(this, R.layout.recyclerview_song, MusicPlayerManager.songList) {
             @Override
             protected void convert(ViewHolder holder, Song s, int position) {
                 holder.setText(R.id.song_info_songName, s.getName());
                 holder.setText(R.id.song_info_singerName, s.getSinger());
 
                 if (position == mNewPosition) {//当前播放歌曲设置
-                    holder.setVisible(R.id.pop_play_status_image,true);
-                    holder.setImageResource(R.id.pop_play_status_image,R.drawable.song_play_icon);
+                    holder.setVisible(R.id.pop_play_status_image, true);
+                    holder.setImageResource(R.id.pop_play_status_image, R.drawable.song_play_icon);
                     holder.setTextColorRes(R.id.song_info_songName, R.color.colorAccent);
                     holder.setTextColorRes(R.id.song_info_singerName, R.color.colorAccent);
                     holder.setTextColorRes(R.id.dividing_line, R.color.colorAccent);
-                }else {
-                    holder.setVisible(R.id.pop_play_status_image,false);
+                } else {
+                    holder.setVisible(R.id.pop_play_status_image, false);
                     holder.setTextColorRes(R.id.song_info_songName, R.color.colorBlack);
                     holder.setTextColorRes(R.id.song_info_singerName, R.color.colorBlack);
                     holder.setTextColorRes(R.id.dividing_line, R.color.colorBlack);
@@ -415,6 +414,4 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         //显示控件
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
     }
-
-
 }

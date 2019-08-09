@@ -2,11 +2,9 @@ package com.mbwr.xx.littlerubbishmusicplayer.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
@@ -17,9 +15,7 @@ import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.util.Log;
 
-import com.mbwr.xx.littlerubbishmusicplayer.IMusicAidlInterface;
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
-import com.mbwr.xx.littlerubbishmusicplayer.activity.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.dao.DaoOperator;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
@@ -31,7 +27,6 @@ import com.mbwr.xx.littlerubbishmusicplayer.widget.ListWidgetProvider;
 import org.litepal.LitePal;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -61,7 +56,6 @@ public class MusicPlayerManager extends Service {
     private static TimerTask task;
     private int msg;
 
-    //    private List<Album> mAlbums;
     private static Album mAlbum;//歌单
     public static List<Song> songList;//歌曲播放列表
 
@@ -207,7 +201,9 @@ public class MusicPlayerManager extends Service {
             mediaPlayer.start();
             isPlaying = mediaPlayer.isPlaying();
             try {
-                MusicApp.iMusicAidlInterface.setPlayInfo(mAlbum.getId(), currentSong, playMode);
+                if (MusicApp.iMusicAidlInterface != null) {
+                    MusicApp.iMusicAidlInterface.setPlayInfo(mAlbum.getId(), currentSong, playMode);
+                }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -244,7 +240,7 @@ public class MusicPlayerManager extends Service {
             mediaPlayer.pause();
             mediaPlayer.stop();
             mediaPlayer.release();
-            isPlaying = mediaPlayer.isPlaying();
+            isPlaying = false;
             stopTimeTask();
             updatePlayModeOrPlayStatus();
         }
@@ -501,6 +497,8 @@ public class MusicPlayerManager extends Service {
         //播放当前歌单指定音乐
         @Override
         public void CallPlay(int position) {
+            mAlbum = musicApp.getLocalAlbum().get(0);
+            songList = mAlbum.getSongs();
             currentSong = position;
             resetMediaPlayer();
             updateSongInfo();
@@ -560,6 +558,11 @@ public class MusicPlayerManager extends Service {
         }
     }
 
+    /**
+     * @author xuxiong
+     * @time 8/7/19  7:19 AM
+     * @describe 将歌曲从当前歌单中删除
+     */
     private boolean removeSong(int position) {
         if (LitePal.delete(Song.class, songList.get(position).getId()) > 0) {
             songList.remove(position);
@@ -580,9 +583,10 @@ public class MusicPlayerManager extends Service {
         try {
             if (mAlbum != null && currentSong >= 0 && (songList.size() - currentSong) > 0) {
                 mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());
+                mediaPlayer.prepare();//缓冲音乐
                 Log.i(TAG, songList.get(currentSong).getName());
             }
-            mediaPlayer.prepare();//缓冲音乐
+
         } catch (IOException e) {
             Log.e(TAG, e.toString());
         }
@@ -602,13 +606,14 @@ public class MusicPlayerManager extends Service {
         Map<String, Long> map = MusicApp.playInfo;
         if (map == null || map.size() == 0) return false;
 
-        DaoOperator daoOperator = new DaoOperator();
+        mAlbum = LitePal.find(Album.class, map.get("albumId"));
 
-        mAlbum = daoOperator.getAlbumById(map.get("albumId"));
         songList = mAlbum.getSongs();
 
+        long songId = map.get("songId");
+
         for (Song s : songList) {
-            if (s.getId() == map.get("songId")) currentSong = songList.indexOf(s);
+            if (s.getId() == songId) currentSong = songList.indexOf(s);
         }
 
         playMode = map.get("playMode").intValue();

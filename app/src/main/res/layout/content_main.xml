@@ -9,13 +9,10 @@
     tools:showIn="@layout/app_bar_main">
 
     <ExpandableListView
-        android:id="@+id/ablum_expandable_list_view"
+        android:id="@+id/album_expandable_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
     </ExpandableListView>
-
-
-
 
 </android.support.constraint.ConstraintLayout>

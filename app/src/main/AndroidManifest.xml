@@ -40,7 +40,7 @@
             android:name=".activity.MusicPlayActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.testActivity" />
+        <activity android:name=".activity.SongListActivity" />
 
         <service android:name=".service.PhoneListenerService">
             <intent-filter>

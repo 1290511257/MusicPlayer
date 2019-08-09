@@ -34,12 +34,6 @@ public class ListWidgetProvider extends AppWidgetProvider {
 
     private static int mProgressMax,playMode;
 
-    /**
-     * 当一个App Widget实例第一次创建时被调用。
-     * 比如，如果用户添加两个App Widget实例，只在第一次被调用。
-     * 如果你需要打开一个新的数据库或者执行其他对于所有的App Widget实例只需要发生一次的设置，
-     * 那么在这里完成这个工作。
-     */
     @Override
     public void onEnabled(Context context) {
         IntentFilter intentFilter = new IntentFilter();
@@ -184,12 +178,14 @@ public class ListWidgetProvider extends AppWidgetProvider {
      */
     private void enableMusicActivity(Context context) {
         Intent intent = new Intent(context, MusicPlayActivity.class);
-        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);//小部件启动application需要设置flag
+        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
     /**
-     * 刷新Widget
+     *  @author xuxiong
+     *  @time 8/7/19  7:21 AM
+     *  @describe 刷新Widget
      */
     private void refreshWidget(Context context, RemoteViews remoteViews) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);

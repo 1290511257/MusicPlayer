@@ -58,7 +58,6 @@ public class MusicApp extends LitePalApplication {
             @Override
             public void onCreate() {//数据库创建时执行此方法,可用来执行一些初始化操作
                 Log.i("xxxxxxxxxxxxxx", "数据库创建!!");
-
             }
 
             @Override
@@ -77,8 +76,6 @@ public class MusicApp extends LitePalApplication {
         localAlbum = LitePal.findAll(Album.class);
         localMusic = LitePal.findAll(Song.class);
 
-//        DaoOperator daoOperator = new DaoOperator();
-//        daoOperator.getAlbumById(1);
         getPlayInfo();
 
         Utils.init(this);

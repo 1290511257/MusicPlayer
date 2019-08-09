@@ -1,5 +1,8 @@
 package com.mbwr.xx.littlerubbishmusicplayer.model;
 
+import com.mbwr.xx.littlerubbishmusicplayer.dao.DaoOperator;
+
+import org.litepal.LitePal;
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
@@ -41,7 +44,7 @@ public class Album extends LitePalSupport {
     }
 
     public List<Song> getSongs() {
-        return songs;
+        return DaoOperator.getSongsByAlbumId(getId());
     }
 
     public void setSongs(List<Song> songs) {
