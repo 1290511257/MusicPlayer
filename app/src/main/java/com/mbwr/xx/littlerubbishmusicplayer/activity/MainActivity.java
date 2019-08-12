@@ -34,17 +34,10 @@ import com.mbwr.xx.littlerubbishmusicplayer.R;
 import com.mbwr.xx.littlerubbishmusicplayer.adapter.AlbumExpandableListAdapter;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Group;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
-import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.service.PhoneListenerService;
-import com.zhy.adapter.recyclerview.CommonAdapter;
-import com.zhy.adapter.recyclerview.base.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.mbwr.xx.littlerubbishmusicplayer.utils.Utils.getContext;
-
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -223,51 +216,51 @@ public class MainActivity extends BaseActivity
      */
     public void showPopuWindow() {
 
-        final View view = LayoutInflater.from(this).inflate(R.layout.popuwindow_add_album, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.popuwindow_add_album, null);
         final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         TextView mCancel, mSure;
-        final EditText mAlbumEditText;
-        mCancel = view.findViewById(R.id.add_album_cancel);
-        mSure = view.findViewById(R.id.add_album_edited);
-        mAlbumEditText = view.findViewById(R.id.add_album_editText);
+//        final EditText mAlbumEditText;
+//        mCancel = view.findViewById(R.id.add_album_cancel);
+//        mSure = view.findViewById(R.id.add_album_edited);
+//        mAlbumEditText = view.findViewById(R.id.add_album_editText);
 
-        mCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });
-        mSure.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });
-        mAlbumEditText.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.i("popuWindow", "run");
+//        mCancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                popupWindow.dismiss();
+//            }
+//        });
+//        mSure.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                popupWindow.dismiss();
+//            }
+//        });
+//        mAlbumEditText.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.i("popuWindow", "run");
+//
+//                mAlbumEditText.requestFocus();
+//                InputMethodManager manager = ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE));
+//                if (manager != null) manager.showSoftInput(view, InputMethodManager.SHOW_FORCED);
+//            }
+//        }, 1000);
 
-                mAlbumEditText.requestFocus();
-                InputMethodManager manager = ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE));
-                if (manager != null) manager.showSoftInput(view, InputMethodManager.SHOW_FORCED);
-            }
-        }, 1000);
-
-        mAlbumEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager manager = ((InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
-                    if (manager != null)
-                        manager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                }
-            }
-        });
+//        mAlbumEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View view, boolean hasFocus) {
+//                if (!hasFocus) {
+//                    InputMethodManager manager = ((InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
+//                    if (manager != null)
+//                        manager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+//                }
+//            }
+//        });
 
         //PopuWindow
-        popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION);
+//        popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+//        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         popupWindow.setContentView(view);
         popupWindow.setAnimationStyle(R.style.PopuWindow_stale);
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
@@ -285,7 +278,12 @@ public class MainActivity extends BaseActivity
             }
         });
         //显示控件
-        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+//        popupWindow.showAsDropDown(getWindow().getDecorView());
+        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.TOP, 0, 0);
+//        mAlbumEditText.requestFocus();
+//        InputMethodManager manager = ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE));
+//        if (manager.showSoftInput(view, InputMethodManager.SHOW_FORCED))
+//            Log.e("------->", "弹出软键盘失败!!");
 //        showSoftInputFromWindow(MainActivity.this, mAlbumEditText);
     }
 
