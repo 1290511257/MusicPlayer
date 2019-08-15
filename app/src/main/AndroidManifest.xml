@@ -9,14 +9,15 @@
     <application
         android:name=".MusicApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/login_logo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.AppCompat">
         <activity
             android:name=".activity.MusicSearchActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".activity.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -31,7 +32,9 @@
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -39,23 +42,22 @@
         <activity
             android:name=".activity.MusicPlayActivity"
             android:alwaysRetainTaskState="true"
+            android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.SongListActivity" />
+        <activity android:name=".activity.AlbumSongListActivity" />
 
         <service android:name=".service.PhoneListenerService">
             <intent-filter>
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
             </intent-filter>
         </service>
-        <service android:name=".service.MusicPlayerManager"></service>
-        <service
-            android:name=".widget.ListWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service android:name=".service.MusicPlayerManager" />
 
         <receiver android:name=".service.MusicPlayerManager$MusicReceiver" />
-        <receiver android:name=".widget.ListWidgetProvider">
+        <receiver android:name=".widget.MusicWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO"/>
             </intent-filter>
 
             <meta-data

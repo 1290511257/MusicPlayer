@@ -31,11 +31,12 @@ import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
 
 public class MusicPlayActivity extends BaseActivity implements View.OnClickListener {
-    private static final String TAG = MusicPlayActivity.class.getSimpleName();
+    private static final String TAG = "------------>" + MusicPlayActivity.class.getSimpleName();
     private static ImageView mBackAlbum, mPlayModeImage, mControl, mNext, mPre, mPlaylist, mDown, mNeedle, mOutLocal, mPopPlayModeImage, mPopRemoveAll;
     private static TextView mTimePlayed, mDuration, mSongName, mSingerName, mPopPlayModeText, mPopWindowClose, mTryGetLrc;
     private static SeekBar mProgress, mVolumeSeek;
@@ -49,12 +50,14 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     private RecyclerView mRecyclerView;
 
     private static int mPlayMode = 0;
-    private boolean isPlaying = false;
+    private static boolean isPlaying = false;
 
     private int mOldPosition, mNewPosition;
 
     private MusicServiceConnection connection;
     private MediaController mediaController;
+    private MusicPlayerManager musicPlayerManager;
+
 
     //ui线程Hander,用以控制音乐播放界面
     public static Handler playHandler = new Handler() {
@@ -89,7 +92,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                 case 2:
                     if (mPlayModeImage == null) break;
                     mPlayMode = msg.getData().getInt("playMode") - 1;
-                    boolean isPlaying = msg.getData().getBoolean("playStatu");
+                    isPlaying = msg.getData().getBoolean("playStatu");
                     switch (mPlayMode) {
                         case 0:
                             mPlayModeImage.setImageResource(R.drawable.play_icn_loop);
@@ -115,7 +118,6 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         //取消标题
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         //取消状态栏
@@ -143,7 +145,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         mSingerName = findViewById(R.id.singerName);
 
         //返回
-        mOutLocal = findViewById(R.id.out_local);
+        mOutLocal = findViewById(R.id.out_local_album);
         //播放模式
         mPlayModeImage = findViewById(R.id.playing_mode);
         //播放&暂停
@@ -206,7 +208,21 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onPostResume() {
+        Log.i(TAG, "onPostResume");
+        musicPlayerManager = MusicPlayerManager.getInstance();
+        super.onPostResume();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(TAG, "onStart");
+        super.onStart();
+    }
+
+    @Override
     protected void onDestroy() {
+        Log.i(TAG, "onDestroy");
         //解绑服务
         unbindService(connection);
         super.onDestroy();
@@ -220,7 +236,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.out_local:
+            case R.id.out_local_album:
                 finish();
                 break;
             case R.id.playing_mode:
@@ -229,16 +245,17 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
             case R.id.playing_play:
                 if (isPlaying) {
                     mediaController.CallPause();
-                    mControl.setImageResource(R.drawable.play_rdi_btn_pause);
-                    isPlaying = false;
+//                    mControl.setImageResource(R.drawable.play_rdi_btn_pause);
+//                    isPlaying = false;
                 } else {
                     mediaController.CallPlay();
-                    mControl.setImageResource(R.drawable.play_rdi_btn_play);
-                    isPlaying = true;
+//                    mControl.setImageResource(R.drawable.play_rdi_btn_play);
+//                    isPlaying = true;
                 }
                 break;
             case R.id.playing_next:
-                mediaController.CallNextMusic();
+//                mediaController.CallNextMusic();
+                musicPlayerManager.nextMusic();
                 break;
             case R.id.playing_pre:
                 mediaController.CallLastMusic();
@@ -312,6 +329,11 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
      */
     public void showPopuWindow() {
 
+        if (null == MusicPlayerManager.songList) {
+            Utils.showToastShort("缺少可以显示的歌单!");
+            return;
+        }
+
         View view = LayoutInflater.from(this).inflate(R.layout.popuwindow_song_list, null);
         final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -326,7 +348,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MusicPlayActivity.this));
 //        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));//栅格布局,每行显示3个item
         mRecyclerView.addItemDecoration(new DividerItemDecoration(MusicPlayActivity.this, DividerItemDecoration.VERTICAL));
-        mAdapter = new CommonAdapter<Song>(this, R.layout.recyclerview_song, MusicPlayerManager.songList) {
+        mAdapter = new CommonAdapter<Song>(this, R.layout.recyclerview_song_playing_item, MusicPlayerManager.songList) {
             @Override
             protected void convert(ViewHolder holder, Song s, int position) {
                 holder.setText(R.id.song_info_songName, s.getName());
@@ -350,7 +372,7 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
 
             @Override
             public void onItemClick(View view, RecyclerView.ViewHolder holder, int position) {
-                mediaController.CallPlay(position);
+                mediaController.CallPlay(-1, position);
                 mOldPosition = mNewPosition;
                 mNewPosition = position;
                 mAdapter.notifyItemChanged(mOldPosition);

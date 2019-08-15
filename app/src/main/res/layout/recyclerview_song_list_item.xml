@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:background="@color/colorWhite"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/check_image_button_out_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/check_image_button"
+            android:layout_width="20dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/colorWhite"
+            android:src="@drawable/nact_icn_daily"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/tv_phone"
+        android:layout_toEndOf="@+id/check_image_button_out_layout">
+
+
+        <TextView
+            android:id="@+id/song_index_text"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/colorBlack" />
+
+        <TextView
+            android:id="@+id/song_info_songName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/dividing_line"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/song_info_songName"
+            android:gravity="center_vertical"
+            android:paddingLeft="10px"
+            android:paddingRight="10px"
+            android:text="-"
+            android:textColor="@color/colorBlack" />
+
+        <TextView
+            android:id="@+id/song_info_singerName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/tv_phone"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textColor="@color/colorBlack" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/tv_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:src="@drawable/music_icn_more" />
+</RelativeLayout>

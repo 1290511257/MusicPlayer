@@ -32,4 +32,5 @@
     <string name="getSongImageAndLrc">获取封面和歌词</string>
     <string name="popUpWindow_play_mode_name">playMode</string>
     <string name="pup_play_close_text_view">Close</string>
+    <string name="search_music">Search Music</string>
 </resources>

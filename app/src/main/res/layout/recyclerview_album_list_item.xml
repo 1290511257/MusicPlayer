@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+
+    <TextView
+        android:id="@+id/album_index"
+        android:layout_width="25dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:textColor="@color/colorBlack" />
+
+    <TextView
+        android:id="@+id/album_name"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/album_index"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
+        android:textColor="@color/colorBlack"
+        android:textSize="18sp" />
+
+
+</RelativeLayout>

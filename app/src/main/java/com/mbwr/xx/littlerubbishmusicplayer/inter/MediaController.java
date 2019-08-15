@@ -10,7 +10,9 @@ public interface MediaController {
 
     void CallPlay();
 
-    void CallPlay(int position);
+    void CallPlay(int songPosition);
+
+    void CallPlay(int albumId,int position);
 
     void CallResume();
 

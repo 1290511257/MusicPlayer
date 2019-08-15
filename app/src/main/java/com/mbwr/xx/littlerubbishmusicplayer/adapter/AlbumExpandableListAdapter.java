@@ -1,16 +1,22 @@
 package com.mbwr.xx.littlerubbishmusicplayer.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.activity.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Group;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
 import java.util.List;
 
@@ -64,24 +70,6 @@ public class AlbumExpandableListAdapter extends BaseExpandableListAdapter {
     //取得用于显示给定分组的视图. 这个方法仅返回分组的视图对象
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-
-        ViewHolderGroup groupHolder;
-        if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(
-                    R.layout.exlist_group_item, parent, false);
-            groupHolder = new ViewHolderGroup();
-            groupHolder.tv_group_name = convertView.findViewById(R.id.tv_group_name);
-            convertView.findViewById(R.id.add_music_album).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-            convertView.setTag(groupHolder);
-        } else {
-            groupHolder = (ViewHolderGroup) convertView.getTag();
-        }
-        groupHolder.tv_group_name.setText(gData.get(groupPosition).getgName());
         return convertView;
     }
 
@@ -99,7 +87,6 @@ public class AlbumExpandableListAdapter extends BaseExpandableListAdapter {
         } else {
             itemHolder = (ViewHolderItem) convertView.getTag();
         }
-
 //        int imageId = R.mipmap.ic_launcher;//默认的歌单图片
 //        itemHolder.vAlbumImage.setImageResource(imageId);
         itemHolder.vAlbumName.setText(iData.get(groupPosition).get(childPosition).getName());
@@ -113,15 +100,15 @@ public class AlbumExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
 
-    private static class ViewHolderGroup {
-        private TextView tv_group_name;
+    public static class ViewHolderGroup {
+        public TextView tv_group_name;
+        public ImageView tv_group_add;
     }
 
-    private static class ViewHolderItem {
+    public static class ViewHolderItem {
         private ImageView vAlbumImage;
         private TextView vAlbumName;
 
     }
-
 
 }

@@ -17,9 +17,9 @@ import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.TimeUtils;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
-public class ListWidgetProvider extends AppWidgetProvider {
+public class MusicWidgetProvider extends AppWidgetProvider {
 
-    private static final String TAG = ListWidgetProvider.class.getSimpleName();
+    private static final String TAG = MusicWidgetProvider.class.getSimpleName();
 
     public static final String OPEN_MUSIC_ACTIVITY = "com.mbwr.xx.OPEN_MUSIC_ACTIVITY";
 
@@ -32,18 +32,22 @@ public class ListWidgetProvider extends AppWidgetProvider {
     public static final String UPDATE_PROGRESS = MusicPlayerManager.UPDATE_PROGRESS;
     public static final String UPDATE_MODE_STATUS = MusicPlayerManager.UPDATE_MODE_STATUS;
 
-    private static int mProgressMax,playMode;
+    private static int mProgressMax, playMode;
+    ComponentName componentName;
+    AppWidgetManager appWidgetManager;
 
     @Override
     public void onEnabled(Context context) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UPDATE_MUSIC_INFO);
-        intentFilter.addAction(UPDATE_MODE_STATUS);
-        intentFilter.addAction(UPDATE_PROGRESS);
-        Utils.getContext().registerReceiver(this, intentFilter);
+        Log.e(TAG, "onEnabled");
+//        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction(UPDATE_MUSIC_INFO);
+//        intentFilter.addAction(UPDATE_MODE_STATUS);
+//        intentFilter.addAction(UPDATE_PROGRESS);
+//        Utils.getContext().registerReceiver(this, intentFilter);
 
         super.onEnabled(context);
     }
+
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -54,8 +58,8 @@ public class ListWidgetProvider extends AppWidgetProvider {
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
 
             Intent startAppIntent = new Intent().setAction(OPEN_MUSIC_ACTIVITY);
-            //在安卓8.1+中不支持广播静态注册，而动态注册需要启动应用程序，因此设定componment指定对指定包名进行广播
-            startAppIntent.setComponent(new ComponentName(context, ListWidgetProvider.class));
+            //在安卓8.0+中不支持广播静态注册，而动态注册需要启动应用程序，因此设定componment指定对指定包名进行广播
+            startAppIntent.setComponent(new ComponentName(context, MusicWidgetProvider.class));
             PendingIntent startAppPendingIntent = PendingIntent.getBroadcast(context, 0, startAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             remoteViews.setOnClickPendingIntent(R.id.tb_openApp, startAppPendingIntent);
 
@@ -84,25 +88,44 @@ public class ListWidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
 
         String action = intent.getAction();
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-
+//        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+//        int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+//                AppWidgetManager.INVALID_APPWIDGET_ID);
         switch (action) {
             case OPEN_MUSIC_ACTIVITY:
                 enableMusicActivity(Utils.getContext());
                 break;
             case UPDATE_MUSIC_INFO:
-                updateMusicInfo(context,intent);
+                updateMusicInfo(context, intent);
                 break;
             case UPDATE_MODE_STATUS:
-                updateModeAndStatus(context,intent);
+                updateModeAndStatus(context, intent);
                 break;
             case UPDATE_PROGRESS:
-                updateProgress(context,intent);
+                updateProgress(context, intent);
+                break;
+            case MusicPlayerManager.RESET_WIDGET:
+                resetWidget(context);
                 break;
         }
         super.onReceive(context, intent);
+    }
+
+    /**
+     * @author xuxiong
+     * @time 8/14/19  8:59 PM
+     * @describe 重置小部件
+     */
+    private void resetWidget(Context context) {
+        Log.i(TAG, "resetWidget");
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        remoteViews.setTextViewText(R.id.song_name, "");
+        remoteViews.setTextViewText(R.id.singer_name, "");
+        remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(0));
+        remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(0));
+        remoteViews.setProgressBar(R.id.music_progress, 0, 0, false);
+        remoteViews.setImageViewResource(R.id.widget_play, R.drawable.widget_pause_selector);
+        refreshWidget(context, remoteViews);
     }
 
     /**
@@ -111,10 +134,12 @@ public class ListWidgetProvider extends AppWidgetProvider {
      * @describe 更新播放进度条
      */
     private void updateProgress(Context context, Intent intent) {
+
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         Bundle bd = intent.getExtras();
         int mProgress = bd.getInt("currentPosition");
-        remoteViews.setProgressBar(R.id.music_progress,mProgressMax,mProgress,false);
+
+        remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
         remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
         refreshWidget(context, remoteViews);
     }
@@ -135,8 +160,11 @@ public class ListWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.singer_name, bd.getString("singer"));
         remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
         remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
-        remoteViews.setProgressBar(R.id.music_progress,mProgressMax,0,false);
+        remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
 
+        Log.e(TAG, "#########更新MusicInfo\n" +
+                "songName = " + bd.getString("songName") +
+                "\nsinger = " + bd.getString("singer"));
         refreshWidget(context, remoteViews);
     }
 
@@ -146,27 +174,28 @@ public class ListWidgetProvider extends AppWidgetProvider {
      * @describe 更新播放模式和播放状态
      */
     private void updateModeAndStatus(Context context, Intent intent) {
+        Log.d(TAG, "onReceive-------UPDATE_MODE_STATUS");
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         Bundle bd = intent.getExtras();
 
         playMode = bd.getInt("playMode");
         boolean isPlaying = bd.getBoolean("playStatu");
-        switch (playMode){//1顺序循环 2随机循环 3单曲循环
+        switch (playMode) {//1顺序循环 2随机循环 3单曲循环
             case 1:
-                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_loop);
+                remoteViews.setImageViewResource(R.id.widget_play_mode, R.drawable.play_icn_loop);
                 break;
             case 2:
-                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_shuffle);
+                remoteViews.setImageViewResource(R.id.widget_play_mode, R.drawable.play_icn_shuffle);
                 break;
             case 3:
-                remoteViews.setImageViewResource(R.id.widget_play_mode,R.drawable.play_icn_one);
+                remoteViews.setImageViewResource(R.id.widget_play_mode, R.drawable.play_icn_one);
                 break;
         }
 
-        if(isPlaying){
-            remoteViews.setImageViewResource(R.id.widget_play,R.drawable.widget_play_selector);
-        }else {
-            remoteViews.setImageViewResource(R.id.widget_play,R.drawable.widget_pause_selector);
+        if (isPlaying) {
+            remoteViews.setImageViewResource(R.id.widget_play, R.drawable.widget_play_selector);
+        } else {
+            remoteViews.setImageViewResource(R.id.widget_play, R.drawable.widget_pause_selector);
         }
         refreshWidget(context, remoteViews);
     }
@@ -183,13 +212,13 @@ public class ListWidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     *  @author xuxiong
-     *  @time 8/7/19  7:21 AM
-     *  @describe 刷新Widget
+     * @author xuxiong
+     * @time 8/7/19  7:21 AM
+     * @describe 刷新Widget
      */
     private void refreshWidget(Context context, RemoteViews remoteViews) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        ComponentName componentName = new ComponentName(context, ListWidgetProvider.class);
+        appWidgetManager = AppWidgetManager.getInstance(context);
+        componentName = new ComponentName(context, MusicWidgetProvider.class);
         appWidgetManager.updateAppWidget(componentName, remoteViews);
     }
 }

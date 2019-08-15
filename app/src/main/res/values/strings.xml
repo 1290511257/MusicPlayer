@@ -33,4 +33,6 @@
     <string name="title_activity_music_search">MusicSearchActivity</string>
     <string name="popUpWindow_play_mode_name">playMode</string>
     <string name="pup_play_close_text_view">Close</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="search_music">添加歌曲</string>
 </resources>

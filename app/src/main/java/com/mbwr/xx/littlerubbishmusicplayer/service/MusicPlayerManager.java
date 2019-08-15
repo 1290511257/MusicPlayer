@@ -2,6 +2,7 @@ package com.mbwr.xx.littlerubbishmusicplayer.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,12 +18,11 @@ import android.util.Log;
 
 import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.activity.MusicPlayActivity;
-import com.mbwr.xx.littlerubbishmusicplayer.dao.DaoOperator;
 import com.mbwr.xx.littlerubbishmusicplayer.inter.MediaController;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
-import com.mbwr.xx.littlerubbishmusicplayer.widget.ListWidgetProvider;
+import com.mbwr.xx.littlerubbishmusicplayer.widget.MusicWidgetProvider;
 
 import org.litepal.LitePal;
 
@@ -35,17 +35,18 @@ import java.util.TimerTask;
 
 public class MusicPlayerManager extends Service {
 
-    private static final String TAG = MusicPlayerManager.class.getSimpleName();
+    private static final String TAG = "--------------->" + MusicPlayerManager.class.getSimpleName();
 
     //广播
     public static final String UPDATE_MUSIC_INFO = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO";  //更新音乐基本信息
     public static final String UPDATE_PROGRESS = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_PROGRESS";
     public static final String UPDATE_MODE_STATUS = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MODE_STATUS";
+    public static final String RESET_WIDGET = "com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.RESET_WIDGET";
 
-    public static final String PLAY_MODE = ListWidgetProvider.PLAY_MODE;
-    public static final String NEXT_MUSIC = ListWidgetProvider.NEXT_MUSIC;
-    public static final String LAST_MUSIC = ListWidgetProvider.LAST_MUSIC;
-    public static final String PLAY_MUSIC = ListWidgetProvider.PLAY_MUSIC;
+    public static final String PLAY_MODE = MusicWidgetProvider.PLAY_MODE;
+    public static final String NEXT_MUSIC = MusicWidgetProvider.NEXT_MUSIC;
+    public static final String LAST_MUSIC = MusicWidgetProvider.LAST_MUSIC;
+    public static final String PLAY_MUSIC = MusicWidgetProvider.PLAY_MUSIC;
 
     private MusicApp musicApp;
     private static PhoneStateListener mPhoneStateListener;
@@ -54,7 +55,6 @@ public class MusicPlayerManager extends Service {
     private static MusicReceiver musicReceiver;
     private static Timer timer;
     private static TimerTask task;
-    private int msg;
 
     private static Album mAlbum;//歌单
     public static List<Song> songList;//歌曲播放列表
@@ -147,29 +147,31 @@ public class MusicPlayerManager extends Service {
             }
             isPlaying = mediaPlayer.isPlaying();
 
-            //设定音乐播放完成监听事件
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    Log.i(TAG, "音乐播放完成.");
-                    nextMusic();
-                }
-            });
-
-            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                //在media初始化后但并未设置资源时调用某些方法可能会触发此异常异监听
-                //有些异常可能会触发音乐播放完成事件,设置ErrorListener后可以阻塞相应异常事件触发,如:OnCompletionListener
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Log.i(TAG, "OnErrorListener:" + what + "," + extra);
-                    return true;
-                }
-            });
         } else {//缺少播放歌曲信息,启动歌单列表界面
             Log.i(TAG, "缺少播放歌曲信息,启动歌单列表界面");
 //            new Intent()
         }
+
+        //设定音乐播放完成监听事件
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Log.i(TAG, "音乐播放完成.");
+                nextMusic();
+            }
+        });
+
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            //在media初始化后但并未设置资源时调用某些方法可能会触发此异常异监听
+            //有些异常可能会触发音乐播放完成事件,设置ErrorListener后可以阻塞相应异常事件触发,如:OnCompletionListener
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.i(TAG, "OnErrorListener:" + what + "," + extra);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -183,11 +185,12 @@ public class MusicPlayerManager extends Service {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+//        resetMusicWidget();
         stop();
         if (musicReceiver != null) {
             unregisterReceiver(musicReceiver);
         }
-        super.onDestroy();
     }
 
     /**
@@ -202,7 +205,7 @@ public class MusicPlayerManager extends Service {
             isPlaying = mediaPlayer.isPlaying();
             try {
                 if (MusicApp.iMusicAidlInterface != null) {
-                    MusicApp.iMusicAidlInterface.setPlayInfo(mAlbum.getId(), currentSong, playMode);
+                    MusicApp.iMusicAidlInterface.setPlayInfo(mAlbum.getId(), songList.get(currentSong).getId(), playMode);
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -219,6 +222,7 @@ public class MusicPlayerManager extends Service {
      * @describe 暂停播放当前歌曲
      */
     public static void pause() {
+        Log.i(TAG, "pause");
         if (mediaPlayer != null) {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
@@ -257,13 +261,17 @@ public class MusicPlayerManager extends Service {
         }
     }
 
+    public void OnPause() {
+        pause();
+    }
+
     /**
      * @author xuxiong
      * @time 7/28/19  9:03 PM
      * @describe 播放上一首歌曲
      */
     private void lastMusic() {
-
+        nextMusic();
     }
 
     /**
@@ -271,8 +279,8 @@ public class MusicPlayerManager extends Service {
      * @time 7/28/19  9:04 PM
      * @describe 播放下一首歌曲
      */
-    private void nextMusic() {
-
+    public void nextMusic() {
+        if (!checkInitData()) return;
         int length = songList.size();
         switch (playMode) {
             case 1://顺序播放
@@ -292,12 +300,12 @@ public class MusicPlayerManager extends Service {
                 }
                 break;
             case 3:
+                if (currentSong == -1 && songList.size() != 0) currentSong = 0;
                 break;
         }
         stopTimeTask();
         resetMediaPlayer();
         play();
-
     }
 
     /**
@@ -342,7 +350,7 @@ public class MusicPlayerManager extends Service {
      */
     private static void updateSongInfo() {
 
-        if (songList == null || songList.size() <= currentSong) return;
+        if (currentSong == -1 || songList == null || songList.size() <= currentSong) return;
         Song song = songList.get(currentSong);
         int duration = mediaPlayer.getDuration();
         int currentPosition = mediaPlayer.getCurrentPosition();
@@ -359,6 +367,7 @@ public class MusicPlayerManager extends Service {
 
         //BoardCast
         Intent intent = new Intent(UPDATE_MUSIC_INFO);
+        intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
         Bundle bd = new Bundle();
         bd.putString("songName", song.getName());
         bd.putString("singer", song.getSinger());
@@ -366,6 +375,10 @@ public class MusicPlayerManager extends Service {
         bd.putInt("duration", duration);
         intent.putExtras(bd);
         Utils.getContext().sendBroadcast(intent);
+
+        Log.i(TAG, "updateSongInfo:\n" +
+                "songName = " + song.getName() +
+                "\nsinger = " + song.getSinger());
     }
 
     /**
@@ -394,6 +407,7 @@ public class MusicPlayerManager extends Service {
 
         //BoardCast
         Intent intent = new Intent(UPDATE_MODE_STATUS);
+        intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
         Bundle bd = new Bundle();
         bd.putInt("playMode", playMode);
         bd.putBoolean("playStatu", isPlaying);
@@ -426,6 +440,7 @@ public class MusicPlayerManager extends Service {
 
                 //BoardCast
                 Intent intent = new Intent(UPDATE_PROGRESS);
+                intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
                 Bundle bd = new Bundle();
                 bd.putInt("currentPosition", currentPosition);
                 intent.putExtras(bd);
@@ -485,23 +500,31 @@ public class MusicPlayerManager extends Service {
 
         @Override
         public void CallPause() {
+            if (!checkInitData()) return;
             pause();
         }
 
         //按列表播放音乐
         @Override
         public void CallPlay() {
+            if (!checkInitData()) return;
             play();
         }
 
-        //播放当前歌单指定音乐
         @Override
-        public void CallPlay(int position) {
-            mAlbum = musicApp.getLocalAlbum().get(0);
-            songList = mAlbum.getSongs();
+        public void CallPlay(int songPosition) {
+
+        }
+
+        //切歌单播放音乐
+        @Override
+        public void CallPlay(int albumId, int position) {
+            if (mAlbum == null || ((albumId != -1) && (albumId != mAlbum.getId()))) {
+                mAlbum = LitePal.find(Album.class, albumId);
+                songList = mAlbum.getSongs();
+            }
             currentSong = position;
             resetMediaPlayer();
-            updateSongInfo();
             play();
         }
 
@@ -579,21 +602,21 @@ public class MusicPlayerManager extends Service {
      * @describe mediaPlayer初始化, 以及播放界面歌曲信息更新
      */
     private void resetMediaPlayer() {
+        Log.i(TAG, "resetMediaPlayer");
         mediaPlayer.reset();//恢复初始化
         try {
             if (mAlbum != null && currentSong >= 0 && (songList.size() - currentSong) > 0) {
                 mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());
                 mediaPlayer.prepare();//缓冲音乐
-                Log.i(TAG, songList.get(currentSong).getName());
+//                Log.i(TAG, songList.get(currentSong).getName());
             }
-
         } catch (IOException e) {
             Log.e(TAG, e.toString());
         }
         isPlaying = mediaPlayer.isPlaying();
 //        mediaPlayer.getTimestamp();
-        updateSongInfo();
-        updatePlayModeOrPlayStatus();
+//        updateSongInfo();
+//        updatePlayModeOrPlayStatus();
     }
 
     /**
@@ -602,23 +625,25 @@ public class MusicPlayerManager extends Service {
      * @describe 初始化设置歌曲信息
      */
     private boolean InitMusicInfo() {
-
         Map<String, Long> map = MusicApp.playInfo;
         if (map == null || map.size() == 0) return false;
-
         mAlbum = LitePal.find(Album.class, map.get("albumId"));
-
+        if (mAlbum == null || mAlbum.getSongs() == null) return false;
         songList = mAlbum.getSongs();
-
         long songId = map.get("songId");
-
         for (Song s : songList) {
             if (s.getId() == songId) currentSong = songList.indexOf(s);
         }
-
         playMode = map.get("playMode").intValue();
-
         if (currentSong != -1 && playMode != -1 && songList != null && mAlbum != null) return true;
         return false;
     }
+
+    private boolean checkInitData() {
+        if (mAlbum == null || mAlbum.getSongs() == null || songList.size() <= currentSong)
+            return false;
+        return true;
+    }
+
+
 }

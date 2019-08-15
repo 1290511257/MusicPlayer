@@ -1,8 +1,15 @@
 package com.mbwr.xx.littlerubbishmusicplayer.utils;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.BuildConfig;
+import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,5 +78,13 @@ public class Utils {
             }
         }
         return sDebug;
+    }
+
+    public static void showToastShort(String showText) {
+        Toast.makeText(context, showText, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void showToastLong(String showText) {
+        Toast.makeText(context, showText, Toast.LENGTH_LONG).show();
     }
 }

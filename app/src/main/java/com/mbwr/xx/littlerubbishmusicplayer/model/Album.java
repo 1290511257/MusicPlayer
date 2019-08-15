@@ -9,13 +9,13 @@ import org.litepal.crud.LitePalSupport;
 import java.util.List;
 
 /**
- *  @author xuxiong
- *  @time 8/1/19  9:29 PM
- *  @describe 这里的album指的是本地音乐歌单,并不是歌手专辑
+ * @author xuxiong
+ * @time 8/1/19  9:29 PM
+ * @describe 这里的album指的是本地音乐歌单, 并不是歌手专辑
  */
 public class Album extends LitePalSupport {
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(defaultValue = "1")
@@ -51,7 +51,8 @@ public class Album extends LitePalSupport {
         this.songs = songs;
     }
 
-    public Album(){}
+    public Album() {
+    }
 
     public Album(String name, List<Song> songs) {
         this.name = name;

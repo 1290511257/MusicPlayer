@@ -35,7 +35,7 @@ import java.util.List;
 public class MusicSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnTouchListener {
 
     private static final String TAG = MusicSearchActivity.class.getSimpleName();
-    private TextView thepath, seaching, head, allchoose;
+    private TextView mPath, mSearching, head, mAllChoose;
     private LinearLayout mLinearLayout;
     private ImageView mOutLocal;
     private Button mBeginSearch, mSureAdd;
@@ -58,7 +58,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
             super.handleMessage(msg);
             switch (msg.what) {
                 case 0:
-//                    thepath.setText((String) msg.obj);//显示搜索路径
+//                    mPath.setText((String) msg.obj);//显示搜索路径
                     break;
                 case 1:
                     if (mCanAddSongList.size() == 0) {
@@ -68,7 +68,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
                     musicAdapter.setList(mCanAddSongList);
                     musicAdapter.notifyDataSetChanged();
                     mLinearLayout.setVisibility(View.GONE);
-                    allchoose.setVisibility(View.VISIBLE);
+                    mAllChoose.setVisibility(View.VISIBLE);
                     mSureAdd.setBackgroundResource(R.color.colorPrimary);
 //                    mSureAdd.setBackgroundColor(Color.parseColor("#FF4040"));
                     mSureAdd.setEnabled(true);
@@ -91,15 +91,15 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_music_search);
 
         musicApp = (MusicApp) this.getApplication();
-        seaching = findViewById(R.id.seaching);//
+        mSearching = findViewById(R.id.seaching);//
         head = findViewById(R.id.head_local);
-        thepath = findViewById(R.id.what_path);
-        mOutLocal = findViewById(R.id.out_local);
+        mPath = findViewById(R.id.what_path);
+        mOutLocal = findViewById(R.id.out_local_album);
         mBeginSearch = findViewById(R.id.begin_seach);
         mSureAdd = findViewById(R.id.sure_list);
         mLinearLayout = findViewById(R.id.show_local);
         mSongList = findViewById(R.id.show_music);//获取list列表
-        allchoose = findViewById(R.id.allchoose);
+        mAllChoose = findViewById(R.id.all_choose);
         mAddedSongList = musicApp.getLocalMusic();
         musicAdapter = new MusicSearchListAdapter(this);//list适配器
         musicAdapter.setList(mCanAddSongList);
@@ -109,7 +109,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         mBeginSearch.setOnClickListener(this);
         mSureAdd.setOnClickListener(this);
         mSureAdd.setEnabled(false);//先设定为不可选
-        allchoose.setOnClickListener(this);
+        mAllChoose.setOnClickListener(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -133,16 +133,16 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.out_local:
+            case R.id.out_local_album:
                 finish();
                 break;
             case R.id.begin_seach://歌曲搜索
                 mBeginSearch.setVisibility(View.GONE);
-                seaching.setVisibility(View.VISIBLE);
-                thepath.setVisibility(View.VISIBLE);
+                mSearching.setVisibility(View.VISIBLE);
+                mPath.setVisibility(View.VISIBLE);
                 new SearchMusicThread().start();
                 break;
-            case R.id.allchoose:
+            case R.id.all_choose:
                 allSelectChanges();
                 break;
             case R.id.sure_list:
@@ -169,7 +169,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MusicSearchListAdapter.ViewHolder vHolder = (MusicSearchListAdapter.ViewHolder) view.getTag();
         vHolder.vCheckBox.toggle();
-        MusicSearchListAdapter.isSelected.put(position, vHolder.vCheckBox.isChecked());
+        MusicSearchListAdapter.mIsSelected.put(position, vHolder.vCheckBox.isChecked());
     }
 
     /**
@@ -261,8 +261,8 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
      * @describe 添加新歌曲
      */
     private void progressSelectedSongs() {
-        for (int songPosition = 0; songPosition < MusicSearchListAdapter.isSelected.size(); songPosition++) {
-            if (MusicSearchListAdapter.isSelected.get(songPosition)) {//过滤非选择歌曲
+        for (int songPosition = 0; songPosition < MusicSearchListAdapter.mIsSelected.size(); songPosition++) {
+            if (MusicSearchListAdapter.mIsSelected.get(songPosition)) {//过滤非选择歌曲
                 progressOneSelectedSong(songPosition);
             }
         }
@@ -304,16 +304,16 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
      */
     private void allSelectChanges() {
         if (mSelectAll) {
-            allchoose.setText("全选");
+            mAllChoose.setText("全选");
             mSelectAll = false;
             for (int i = 0; i < mCanAddSongList.size(); i++) {
-                MusicSearchListAdapter.isSelected.put(i, false);
+                MusicSearchListAdapter.mIsSelected.put(i, false);
             }
         } else {
-            allchoose.setText("取消全选");
+            mAllChoose.setText("取消全选");
             mSelectAll = true;
             for (int i = 0; i < mCanAddSongList.size(); i++) {
-                MusicSearchListAdapter.isSelected.put(i, true);
+                MusicSearchListAdapter.mIsSelected.put(i, true);
             }
         }
         musicAdapter.notifyDataSetChanged();

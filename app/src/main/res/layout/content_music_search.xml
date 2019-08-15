@@ -23,7 +23,7 @@
             android:padding="5dp">
 
             <ImageView
-                android:id="@+id/out_local"
+                android:id="@+id/out_local_album"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@mipmap/last" />
@@ -36,7 +36,7 @@
                 android:textColor="#fff" />
 
             <TextView
-                android:id="@+id/allchoose"
+                android:id="@+id/all_choose"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:gravity="center"

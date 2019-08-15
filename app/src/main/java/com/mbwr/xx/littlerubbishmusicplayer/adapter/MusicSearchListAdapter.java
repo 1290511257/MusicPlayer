@@ -24,7 +24,7 @@ public class MusicSearchListAdapter extends BaseAdapter {
 
     private LayoutInflater mInflater;//反射器
 
-    public static Map<Integer, Boolean> isSelected;
+    public static Map<Integer, Boolean> mIsSelected;
 
     public MusicSearchListAdapter(Context context) {
         this.mInflater = LayoutInflater.from(context);
@@ -32,9 +32,9 @@ public class MusicSearchListAdapter extends BaseAdapter {
 
     public void setList(List<Song> list) {
         this.mSongList = list;
-        isSelected = new HashMap<>();
+        mIsSelected = new HashMap<>();
         for (int i = 0; i < list.size(); i++) {
-            isSelected.put(i, false);
+            mIsSelected.put(i, false);
         }
     }
 
@@ -67,7 +67,7 @@ public class MusicSearchListAdapter extends BaseAdapter {
         }
 
         Song mSong = mSongList.get(position);
-        holder.vCheckBox.setChecked(isSelected.get(position));
+        holder.vCheckBox.setChecked(mIsSelected.get(position));
         holder.vSongName.setText(mSong.getName() + "-" + mSong.getSinger());
 
         return convertView;

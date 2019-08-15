@@ -9,7 +9,9 @@ import android.util.Log;
 
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
+import com.mbwr.xx.littlerubbishmusicplayer.service.MusicPlayerManager;
 import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
+import com.mbwr.xx.littlerubbishmusicplayer.widget.MusicWidgetProvider;
 
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
@@ -51,7 +53,7 @@ public class MusicApp extends LitePalApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        Log.i(TAG, "onCreate");
         //初始化Litepal,设置数据库更新监听
         LitePal.initialize(this);
         LitePal.registerDatabaseListener(new DatabaseListener() {
@@ -65,9 +67,7 @@ public class MusicApp extends LitePalApplication {
                 Log.i("xxxxxxxxxxxxxx", "数据库有更新!!");
             }
         });
-
         if (0 == LitePal.count(Album.class)) (new Album("所有歌曲", null)).save();
-
 //        LitePal.deleteAll(Album.class);
 //        LitePal.deleteAll(Song.class);
 
@@ -75,10 +75,9 @@ public class MusicApp extends LitePalApplication {
 //        List<Song> songList = album.getSongs();
         localAlbum = LitePal.findAll(Album.class);
         localMusic = LitePal.findAll(Song.class);
-
         getPlayInfo();
-
         Utils.init(this);
+        resetMusicWidget();
     }
 
     /**
@@ -87,8 +86,6 @@ public class MusicApp extends LitePalApplication {
      * @describe 获取上次播放歌曲信息
      */
     private void getPlayInfo() {
-
-
         Intent intent2 = new Intent();
         intent2.setAction("com.mbwr.xx.myapplication.ProviderInfoService.RemoteBinder");
         intent2.setPackage("com.mbwr.xx.myapplication");
@@ -108,10 +105,13 @@ public class MusicApp extends LitePalApplication {
                         playInfo.put("songId", songId);
                         playInfo.put("playMode", playMode);
                     }
+                    Log.i("AIDL", "拿到服务端数据:\n" +
+                            "albumId = " + albumId +
+                            "\nsongId = " + songId +
+                            "\nplayMode = " + playMode);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-
             }
 
             @Override
@@ -119,5 +119,14 @@ public class MusicApp extends LitePalApplication {
 
             }
         }, BIND_AUTO_CREATE);
+
+    }
+
+    //初始化设置小部件
+    private void resetMusicWidget() {
+        //BoardCast
+        Intent intent = new Intent(MusicPlayerManager.RESET_WIDGET);
+        intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
+        Utils.getContext().sendBroadcast(intent);
     }
 }

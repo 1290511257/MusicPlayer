@@ -18,12 +18,6 @@ public class PhoneListener extends PhoneStateListener {
         switch (state) {
             case TelephonyManager.CALL_STATE_IDLE: //无任何状态时
                 Log.i(TAG, "CALL_STATE_IDLE");
-//                if (!aBoolean) {
-//                    Message message = new Message();
-//                    message.what = 1;
-//                    MusicPlayerManager.phoneListenerHander.sendMessage(message);
-//                    aBoolean = true;
-//                }
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK: //接通
                 Log.i(TAG, "CALL_STATE_OFFHOOK");
@@ -33,7 +27,8 @@ public class PhoneListener extends PhoneStateListener {
                 Message message = new Message();
                 message.what = 0;
                 MusicPlayerManager.phoneListenerHander.sendMessage(message);
-                aBoolean = false;
+//                MusicPlayerManager musicPlayerManager = MusicPlayerManager.getInstance();
+//                musicPlayerManager.OnPause();
                 break;
         }
 

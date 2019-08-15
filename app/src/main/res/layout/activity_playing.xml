@@ -32,7 +32,7 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
             <ImageView
-                android:id="@+id/out_local"
+                android:id="@+id/out_local_album"
                 android:layout_width="@dimen/musicPlay_activity_outLocal_imageView_width"
                 android:layout_height="@dimen/musicPlay_activity_outLocal_imageView_width"
                 android:src="@mipmap/last" />

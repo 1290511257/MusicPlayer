@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.SongListActivity"
-    tools:showIn="@layout/activity_music_play">
+    tools:context=".activity.AlbumSongListActivity"
+    tools:showIn="@layout/activity_music_list">
 
 
 
