@@ -5,19 +5,11 @@ import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.mbwr.xx.littlerubbishmusicplayer.MusicApp;
 import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
-import com.mbwr.xx.littlerubbishmusicplayer.model.Song;
 
-import org.litepal.LitePal;
-import org.litepal.tablemanager.callback.DatabaseListener;
-
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 

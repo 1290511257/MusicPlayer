@@ -111,18 +111,7 @@ public class MusicSearchActivity extends BaseActivity implements View.OnClickLis
         mSureAdd.setEnabled(false);//先设定为不可选
         mAllChoose.setOnClickListener(this);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MusicPlayActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
     }
 
     /**

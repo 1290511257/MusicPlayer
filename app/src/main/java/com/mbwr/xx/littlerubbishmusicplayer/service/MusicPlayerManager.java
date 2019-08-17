@@ -120,8 +120,8 @@ public class MusicPlayerManager extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         Log.i(TAG, "onCreate start");
+//        resetMusicWidget();
 
         mediaPlayer = new MediaPlayer();
         musicApp = (MusicApp) this.getApplication();
@@ -135,24 +135,6 @@ public class MusicPlayerManager extends Service {
         intentFilter.addAction(PLAY_MUSIC);
         registerReceiver(musicReceiver, intentFilter);
 
-        if (InitMusicInfo()) {
-            mediaPlayer.reset();//恢复初始化
-            try {
-                if (songList.size() > 0) {
-                    mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());//  song.getFilePath());
-                    mediaPlayer.prepare();//缓冲音乐
-                }
-            } catch (IOException e) {
-                Log.e(TAG, e.toString());
-            }
-            isPlaying = mediaPlayer.isPlaying();
-
-
-        } else {//缺少播放歌曲信息,启动歌单列表界面
-            Log.i(TAG, "缺少播放歌曲信息,启动歌单列表界面");
-//            new Intent()
-        }
-
         //设定音乐播放完成监听事件
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
@@ -160,6 +142,30 @@ public class MusicPlayerManager extends Service {
             public void onCompletion(MediaPlayer mp) {
                 Log.i(TAG, "音乐播放完成.");
                 nextMusic();
+            }
+        });
+
+        //音乐准备完成事件
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                Log.i(TAG, "音乐播放准备完成...");
+                updateSongInfo();
+            }
+        });
+
+        mediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                Log.i(TAG, "OnInfoListener");
+                return false;
+            }
+        });
+
+        mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                Log.i(TAG, "setOnBufferingUpdateListener");
             }
         });
 
@@ -172,14 +178,27 @@ public class MusicPlayerManager extends Service {
                 return true;
             }
         });
+
+        if (InitMusicInfo()) {
+            mediaPlayer.reset();//恢复初始化
+            try {
+                if (songList.size() > 0) {
+                    mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());//  song.getFilePath());
+                    mediaPlayer.prepare();//缓冲音乐
+                }
+            } catch (IOException e) {
+                Log.e(TAG, e.toString());
+            }
+            isPlaying = mediaPlayer.isPlaying();
+        } else {//缺少播放歌曲信息,启动歌单列表界面
+            Log.i(TAG, "缺少播放歌曲信息,启动歌单列表界面");
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand运行.");
-        //每次start service都会运行此方法
-        updateSongInfo();
-        updatePlayModeOrPlayStatus();
+        Log.i(TAG, "onStartCommand运行.");//
+
         return START_NOT_STICKY;
     }
 
@@ -211,7 +230,7 @@ public class MusicPlayerManager extends Service {
                 e.printStackTrace();
             }
             startTimeTask();
-            updateSongInfo();
+//            updateSongInfo();
             updatePlayModeOrPlayStatus();
         }
     }
@@ -228,7 +247,7 @@ public class MusicPlayerManager extends Service {
                 mediaPlayer.pause();
                 isPlaying = mediaPlayer.isPlaying();
                 stopTimeTask();
-                updateSongInfo();
+//                updateSongInfo();
                 updatePlayModeOrPlayStatus();
             }
         }
@@ -375,6 +394,8 @@ public class MusicPlayerManager extends Service {
         bd.putInt("duration", duration);
         intent.putExtras(bd);
         Utils.getContext().sendBroadcast(intent);
+
+        updatePlayModeOrPlayStatus();
 
         Log.i(TAG, "updateSongInfo:\n" +
                 "songName = " + song.getName() +
@@ -594,6 +615,15 @@ public class MusicPlayerManager extends Service {
             return true;
         }
         return false;
+    }
+
+
+    //初始化设置小部件
+    private void resetMusicWidget() {
+        //BoardCast
+        Intent intent = new Intent(MusicPlayerManager.RESET_WIDGET);
+        intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
+        Utils.getContext().sendBroadcast(intent);
     }
 
     /**

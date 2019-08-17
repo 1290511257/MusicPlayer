@@ -101,7 +101,7 @@ public class AlbumSongListActivity extends Activity {
         musicApp = (MusicApp) this.getApplication();
 
         Intent aIntent = getIntent();
-        Bundle bd = aIntent.getBundleExtra("MainActivity");
+        Bundle bd = aIntent.getBundleExtra("MainActivityOld");
         albumId = bd.getInt("album");
         mAlbumSongs = DaoOperator.getSongsByAlbumId(albumId);
 

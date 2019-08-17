@@ -1,22 +1,16 @@
 package com.mbwr.xx.littlerubbishmusicplayer.adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
-import com.mbwr.xx.littlerubbishmusicplayer.activity.MainActivity;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 import com.mbwr.xx.littlerubbishmusicplayer.model.Group;
-import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
 import java.util.List;
 
