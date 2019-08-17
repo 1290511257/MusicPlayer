@@ -1,5 +1,6 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     //UI Objects
     private TextView txt_topbar;
     private RadioGroup rg_tab_bar;
-    private RadioButton rb_channel;
+    private RadioButton rb_found,rb_music;
     private RadioButton rb_message;
     private RadioButton rb_better;
     private RadioButton rb_setting;
@@ -40,19 +41,31 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         setContentView(R.layout.activity_main_fragment);
         mAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
         bindViews();
-        rb_channel.setChecked(true);
+        rb_found.setChecked(true);
     }
 
     private void bindViews() {
         txt_topbar = findViewById(R.id.txt_topbar);
         rg_tab_bar = findViewById(R.id.rg_tab_bar);
-        rb_channel = findViewById(R.id.rb_channel);
+        rb_found = findViewById(R.id.rb_found);
         rb_message = findViewById(R.id.rb_message);
         rb_better = findViewById(R.id.rb_better);
         rb_setting = findViewById(R.id.rb_setting);
+        rb_music = findViewById(R.id.rb_music);
+
+        //定义底部图片大小
+        Drawable drawableFound = getResources().getDrawable(R.drawable.tab_menu_found);
+        drawableFound.setBounds(0, 0, 69, 69);//第一0是距左右边距离，第二0是距上下边距离，第三69长度,第四宽度
+        rb_found.setCompoundDrawables(null, drawableFound, null, null);//只放上面
+
+        Drawable drawableMusic = getResources().getDrawable(R.drawable.tab_menu_albums);
+        drawableMusic.setBounds(0, 0, 69, 69);//第一0是距左右边距离，第二0是距上下边距离，第三69长度,第四宽度
+        rb_music.setCompoundDrawables(null, drawableMusic, null, null);//只放上面
+
+
         rg_tab_bar.setOnCheckedChangeListener(this);
 
-        vpager = findViewById(R.id.vpager);
+        vpager = findViewById(R.id.view_pager);
         vpager.setAdapter(mAdapter);
         vpager.setCurrentItem(0);
         vpager.addOnPageChangeListener(this);
@@ -61,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         switch (checkedId) {
-            case R.id.rb_channel:
+            case R.id.rb_found:
                 vpager.setCurrentItem(PAGE_ONE);
                 break;
             case R.id.rb_message:
@@ -94,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         if (state == 2) {
             switch (vpager.getCurrentItem()) {
                 case PAGE_ONE:
-                    rb_channel.setChecked(true);
+                    rb_found.setChecked(true);
                     break;
                 case PAGE_TWO:
                     rb_message.setChecked(true);

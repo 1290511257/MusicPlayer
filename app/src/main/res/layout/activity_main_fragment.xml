@@ -38,10 +38,10 @@
         android:orientation="horizontal">
 
         <RadioButton
-            android:id="@+id/rb_channel"
+            android:id="@+id/rb_found"
             style="@style/tab_menu_item_bottom"
-            android:drawableTop="@drawable/tab_menu_channel"
-            android:text="@string/tab_menu_alert" />
+            android:drawableTop="@drawable/tab_menu_found"
+            android:text="@string/tab_menu_found" />
 
         <RadioButton
             android:id="@+id/rb_message"
@@ -50,10 +50,16 @@
             android:text="@string/tab_menu_profile" />
 
         <RadioButton
+            android:id="@+id/rb_music"
+            style="@style/tab_menu_item_bottom"
+            android:drawableTop="@drawable/tab_menu_albums"
+            android:text="@string/tab_menu_my" />
+
+        <RadioButton
             android:id="@+id/rb_better"
             style="@style/tab_menu_item_bottom"
             android:drawableTop="@drawable/tab_menu_better"
-            android:text="@string/tab_menu_pay" />
+            android:text="@string/tab_menu_my" />
 
         <RadioButton
             android:id="@+id/rb_setting"
@@ -71,7 +77,7 @@
         android:background="@color/div_white" />
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/vpager"
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/div_tab_bar"
