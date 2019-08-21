@@ -301,8 +301,7 @@ public class AlbumSongListActivity extends BaseActivity {
      * @describe 检查是否有item被选择
      */
     private Boolean checkAnySelected() {
-        if (mSelectedList.containsValue(true)) return true;
-        return false;
+        return mSelectedList.containsValue(true);
     }
 
     /**

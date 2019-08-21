@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ll_right"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/widget_background_color"
@@ -115,7 +114,6 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:id="@+id/widget_control"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="@dimen/widget_mediaControl_linearLayout_height"

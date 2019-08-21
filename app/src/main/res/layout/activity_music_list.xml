@@ -43,7 +43,6 @@
             android:paddingBottom="5dp">
 
             <LinearLayout
-                android:id="@+id/play_current_album"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -63,7 +62,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/share_to_others"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -83,7 +81,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/download_to_local"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -171,7 +168,6 @@
         </LinearLayout>
 
         <View
-            android:id="@+id/dividing_line1"
             android:layout_width="fill_parent"
             android:layout_height="2px"
             android:background="@color/color_diliver_wy" />
@@ -247,7 +243,6 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/multiply_download"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"

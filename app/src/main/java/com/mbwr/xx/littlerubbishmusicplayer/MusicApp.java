@@ -59,20 +59,16 @@ public class MusicApp extends LitePalApplication {
         LitePal.registerDatabaseListener(new DatabaseListener() {
             @Override
             public void onCreate() {//数据库创建时执行此方法,可用来执行一些初始化操作
-                Log.i("xxxxxxxxxxxxxx", "数据库创建!!");
+                Log.i(TAG, "数据库创建!!");
             }
 
             @Override
             public void onUpgrade(int oldVersion, int newVersion) {//表结构有更新会执行此方法
-                Log.i("xxxxxxxxxxxxxx", "数据库有更新!!");
+                Log.i(TAG, "数据库有更新!!");
             }
         });
         if (0 == LitePal.count(Album.class)) (new Album("所有歌曲", null)).save();
-//        LitePal.deleteAll(Album.class);
-//        LitePal.deleteAll(Song.class);
 
-//        Album album = LitePal.(Album.class, 1);
-//        List<Song> songList = album.getSongs();
         localAlbum = LitePal.findAll(Album.class);
         localMusic = LitePal.findAll(Song.class);
         getPlayInfo();
@@ -105,10 +101,10 @@ public class MusicApp extends LitePalApplication {
                         playInfo.put("songId", songId);
                         playInfo.put("playMode", playMode);
                     }
-                    Log.i("AIDL", "拿到服务端数据:\n" +
-                            "albumId = " + albumId +
-                            "\nsongId = " + songId +
-                            "\nplayMode = " + playMode);
+//                    Log.i("AIDL", "拿到服务端数据:\n" +
+//                            "albumId = " + albumId +
+//                            "\nsongId = " + songId +
+//                            "\nplayMode = " + playMode);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

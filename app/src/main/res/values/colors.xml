@@ -6,17 +6,14 @@
     <color name="colorBlack">#000000</color>
     <color name="gray_40">#404040</color>
     <color name="colorWhite">#ffffff</color>
-    <color name="widget_bg">#4C7980</color>
     <color name="black_overlay">#66000000</color>
     <color name="widget_background_color">#30000000</color>
     <color name="music_activity_view_background">#70000000</color>
     <color name="color_diliver">#16843284</color>
 
 
-    <color name="bg_black">#000000</color>
     <color name="bg_white">#FFFFFF</color>
     <color name="bg_topbar">#FCFCFC</color>
-    <color name="bg_gray">#00F1F1F1</color>
     <color name="transparent">#00FFFFFF</color>
 
     <color name="text_gray">#8D7A71</color>
@@ -29,13 +26,7 @@
     <!--网易云截取的颜色-->
     <color name="color_orange_red">#FF534A</color>
     <color name="color_bottom_bar_bg">#ECE1DE</color>
-    <color name="color_bottom_img_bg">#89817E</color>
-    <color name="color_bottom_text_pre">#FF4142</color>
-    <color name="color_bottom_text">#C2BCBB</color>
-    <color name="color_top_edit_text_bg">#F7F7F7</color>
     <color name="color_song_name">#363637</color>
     <color name="color_diliver_wy">#E5E5E5</color>
-    
-    
->>>>>>> Stashed changes
+
 </resources>
