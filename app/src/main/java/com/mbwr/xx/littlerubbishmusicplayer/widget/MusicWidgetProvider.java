@@ -88,6 +88,7 @@ public class MusicWidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
 
         String action = intent.getAction();
+        Log.e(TAG, action);
 //        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 //        int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
 //                AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -161,10 +162,10 @@ public class MusicWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
         remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
         remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
-
-        Log.e(TAG, "#########更新MusicInfo\n" +
-                "songName = " + bd.getString("songName") +
-                "\nsinger = " + bd.getString("singer"));
+//
+//        Log.e(TAG, "#########更新MusicInfo\n" +
+//                "songName = " + bd.getString("songName") +
+//                "\nsinger = " + bd.getString("singer"));
         refreshWidget(context, remoteViews);
     }
 
@@ -174,7 +175,7 @@ public class MusicWidgetProvider extends AppWidgetProvider {
      * @describe 更新播放模式和播放状态
      */
     private void updateModeAndStatus(Context context, Intent intent) {
-        Log.d(TAG, "onReceive-------UPDATE_MODE_STATUS");
+//        Log.d(TAG, "onReceive-------UPDATE_MODE_STATUS");
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         Bundle bd = intent.getExtras();
 
