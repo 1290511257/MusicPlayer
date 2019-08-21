@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/cm4_btm_icn_music2x"
+        android:state_checked="true" />
+    <item android:drawable="@drawable/cm4_btm_icn_music_new_prs2x" />
+</selector>

@@ -18,6 +18,10 @@
             android:name=".activity.MusicSearchActivity"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".activity.MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".activity.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -25,7 +29,6 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -39,14 +42,14 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.MainActivity"
-            android:launchMode="singleInstance"/>
+
         <activity
             android:name=".activity.MusicPlayActivity"
             android:alwaysRetainTaskState="true"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.AlbumSongListActivity" />
+        <activity android:name=".activity.AlbumSongListActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <service android:name=".service.PhoneListenerService">
             <intent-filter>
@@ -55,7 +58,7 @@
         </service>
         <service android:name=".service.MusicPlayerManager" />
 
-        <receiver android:name=".service.MusicPlayerManager$MusicReceiver" />
+        <!--<receiver android:name=".service.MusicPlayerManager$MusicReceiver" />-->
         <receiver android:name=".widget.MusicWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

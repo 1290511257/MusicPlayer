@@ -53,8 +53,8 @@ public class MusicPlayerManager extends Service {
     private static MusicPlayerManager musicPlayerManager;
     private static MediaPlayer mediaPlayer;
     private static MusicReceiver musicReceiver;
-    private static Timer timer;
-    private static TimerTask task;
+    private static Timer timer, timerInfo;
+    private static TimerTask task, taskInfo;
 
     private static Album mAlbum;//歌单
     public static List<Song> songList;//歌曲播放列表
@@ -133,6 +133,7 @@ public class MusicPlayerManager extends Service {
         intentFilter.addAction(NEXT_MUSIC);
         intentFilter.addAction(LAST_MUSIC);
         intentFilter.addAction(PLAY_MUSIC);
+        intentFilter.addAction(UPDATE_MUSIC_INFO);
         registerReceiver(musicReceiver, intentFilter);
 
         //设定音乐播放完成监听事件
@@ -229,10 +230,10 @@ public class MusicPlayerManager extends Service {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            startTimeTask();
-//            updateSongInfo();
-            updatePlayModeOrPlayStatus();
+
+            updateSongInfo();
         }
+        startTimeTask();
     }
 
     /**
@@ -247,8 +248,7 @@ public class MusicPlayerManager extends Service {
                 mediaPlayer.pause();
                 isPlaying = mediaPlayer.isPlaying();
                 stopTimeTask();
-//                updateSongInfo();
-                updatePlayModeOrPlayStatus();
+                updateSongInfo();
             }
         }
     }
@@ -265,7 +265,7 @@ public class MusicPlayerManager extends Service {
             mediaPlayer.release();
             isPlaying = false;
             stopTimeTask();
-            updatePlayModeOrPlayStatus();
+            updateSongInfo();
         }
     }
 
@@ -359,7 +359,7 @@ public class MusicPlayerManager extends Service {
      */
     private void playModeChange() {
         playMode = (playMode % 3) + 1;
-        updatePlayModeOrPlayStatus();
+        updateSongInfo();
     }
 
     /**
@@ -368,7 +368,6 @@ public class MusicPlayerManager extends Service {
      * @describe 更新显示界面歌曲基本信息
      */
     private static void updateSongInfo() {
-
         if (currentSong == -1 || songList == null || songList.size() <= currentSong) return;
         Song song = songList.get(currentSong);
         int duration = mediaPlayer.getDuration();
@@ -381,26 +380,24 @@ public class MusicPlayerManager extends Service {
         bundle.putString("singer", song.getSinger());
         bundle.putInt("currentPosition", currentPosition);
         bundle.putInt("duration", duration);
+        bundle.putInt("playMode", playMode);
+        bundle.putBoolean("playStatu", isPlaying);
         msg.setData(bundle);
         MusicPlayActivity.playHandler.sendMessage(msg);
 
-        //BoardCast
         Intent intent = new Intent(UPDATE_MUSIC_INFO);
         intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
         Bundle bd = new Bundle();
         bd.putString("songName", song.getName());
         bd.putString("singer", song.getSinger());
-        bd.putInt("currentPosition", currentPosition);
-        bd.putInt("duration", duration);
+        bd.putInt("currentPosition", mediaPlayer.getCurrentPosition());
+        bd.putInt("duration", mediaPlayer.getDuration());
+        bd.putInt("playMode", playMode);
+        bd.putBoolean("playStatu", isPlaying);
         intent.putExtras(bd);
         Utils.getContext().sendBroadcast(intent);
-
-        updatePlayModeOrPlayStatus();
-
-        Log.i(TAG, "updateSongInfo:\n" +
-                "songName = " + song.getName() +
-                "\nsinger = " + song.getSinger());
     }
+
 
     /**
      * @author xuxiong
@@ -411,46 +408,23 @@ public class MusicPlayerManager extends Service {
         mediaPlayer.seekTo(progress);
     }
 
-    /**
-     * @author xuxiong
-     * @time 7/26/19  4:55 AM
-     * @describe 更新界面播放模式和播放状态
-     */
-    private static void updatePlayModeOrPlayStatus() {
-        //Hander
-        Message msg = Message.obtain();
-        msg.what = 2;
-        Bundle bundle = new Bundle(); //map
-        bundle.putInt("playMode", playMode);
-        bundle.putBoolean("playStatu", isPlaying);
-        msg.setData(bundle);
-        MusicPlayActivity.playHandler.sendMessage(msg);
-
-        //BoardCast
-        Intent intent = new Intent(UPDATE_MODE_STATUS);
-        intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
-        Bundle bd = new Bundle();
-        bd.putInt("playMode", playMode);
-        bd.putBoolean("playStatu", isPlaying);
-        intent.putExtras(bd);
-        Utils.getContext().sendBroadcast(intent);
-    }
 
     /**
      * @author xuxiong
      * @time 7/26/19  4:25 AM
-     * @describe 更新Progress任务
+     * @describe 更新更新小部件任务
      */
     private static void startTimeTask() {
         //使用Timer 定时器去定时更新播放进度
+        Log.e(TAG, "Task Start");
+
         timer = new Timer();
         task = new TimerTask() {
-
             @Override
             public void run() {
+                if (currentSong == -1 || songList == null || songList.size() <= currentSong) return;
                 int currentPosition = mediaPlayer.getCurrentPosition();
-
-//                Log.i(TAG, "歌曲:" + songList.get(currentSong).getName() + "   正在播放,播放进度:" + currentPosition);
+                Song song = songList.get(currentSong);
                 //Hander
                 Message msg = Message.obtain();
                 msg.what = 1;
@@ -464,19 +438,48 @@ public class MusicPlayerManager extends Service {
                 intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
                 Bundle bd = new Bundle();
                 bd.putInt("currentPosition", currentPosition);
+                bd.putString("songName", song.getName());
+                bd.putString("singer", song.getSinger());
                 intent.putExtras(bd);
                 Utils.getContext().sendBroadcast(intent);
             }
         };
         //0 毫秒后 每隔1秒执行一次run方法
         timer.schedule(task, 0, 250);
+
+        timerInfo = new Timer();
+        taskInfo = new TimerTask() {
+            @Override
+            public void run() {
+                if (currentSong == -1 || songList == null || songList.size() <= currentSong) return;
+                Song song = songList.get(currentSong);
+                Intent intent = new Intent(UPDATE_MUSIC_INFO);
+                intent.setComponent(new ComponentName(Utils.getContext(), MusicWidgetProvider.class));
+                Bundle bd = new Bundle();
+                bd.putString("songName", song.getName());
+                bd.putString("singer", song.getSinger());
+                bd.putInt("currentPosition", mediaPlayer.getCurrentPosition());
+                bd.putInt("duration", mediaPlayer.getDuration());
+                bd.putInt("playMode", playMode);
+                bd.putBoolean("playStatu", isPlaying);
+                intent.putExtras(bd);
+                Utils.getContext().sendBroadcast(intent);
+            }
+        };
+        timerInfo.schedule(taskInfo, 0, 1000);
     }
 
     //实际使用中有时不会正常停止   ?
     private static void stopTimeTask() {
+        Log.e(TAG, "Task Stop");
         if (task != null && timer != null) {
             task.cancel();
             timer.cancel();
+        }
+
+        if (taskInfo != null && timerInfo != null) {
+            taskInfo.cancel();
+            timerInfo.cancel();
         }
     }
 
@@ -486,6 +489,7 @@ public class MusicPlayerManager extends Service {
      * @describe 广播消息接收类
      */
     public class MusicReceiver extends BroadcastReceiver {
+
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -506,6 +510,9 @@ public class MusicPlayerManager extends Service {
                     break;
                 case NEXT_MUSIC:
                     nextMusic();
+                    break;
+                case UPDATE_MUSIC_INFO:
+//                    updateSongInfo();
                     break;
             }
         }
@@ -528,7 +535,9 @@ public class MusicPlayerManager extends Service {
         //按列表播放音乐
         @Override
         public void CallPlay() {
-            if (!checkInitData()) return;
+            if (!checkInitData()) {
+                return;
+            }
             play();
         }
 
@@ -670,8 +679,10 @@ public class MusicPlayerManager extends Service {
     }
 
     private boolean checkInitData() {
-        if (mAlbum == null || mAlbum.getSongs() == null || songList.size() <= currentSong)
+        if (mAlbum == null || mAlbum.getSongs() == null || mAlbum.getSongs().size() == 0 || songList.size() <= currentSong) {
+            Utils.showToastShort("没有可以播放的歌曲!");
             return false;
+        }
         return true;
     }
 

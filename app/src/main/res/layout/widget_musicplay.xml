@@ -3,7 +3,7 @@
     android:id="@+id/ll_right"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/wiget_background_color"
+    android:background="@color/widget_background_color"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -124,7 +124,7 @@
 
         <ImageView
             android:id="@+id/widget_play_mode"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="1"
@@ -134,21 +134,21 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:src="@drawable/widget_pre_selector"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent" />
         <ImageView
             android:id="@+id/widget_play"
             android:layout_weight="1"
             android:src="@drawable/widget_pause_selector"
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent" />
         <ImageView
             android:id="@+id/widget_next"
             android:layout_weight="1"
             android:src="@drawable/widget_next_selector"
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent" />
     </LinearLayout>
 

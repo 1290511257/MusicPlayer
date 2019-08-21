@@ -7,35 +7,52 @@
     <RelativeLayout
         android:id="@+id/ly_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="40dp"
         android:background="@color/bg_topbar">
 
+        <ImageView
+            android:id="@+id/top_bar_image1"
+            android:layout_width="35dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:padding="3dp"
+            android:src="@drawable/cm6_set_icn_scan" />
+
         <TextView
-            android:id="@+id/txt_topbar"
+            android:id="@+id/txt_top_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
+            android:layout_toStartOf="@+id/top_bar_image2"
+            android:layout_toEndOf="@id/top_bar_image1"
             android:gravity="center"
-            android:text="提醒"
-            android:textColor="@color/text_topbar"
+            android:text="@string/my_music"
+            android:textColor="@color/text_top_bar"
             android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/top_bar_image2"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:padding="6dp"
+            android:src="@drawable/loading1" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="2px"
             android:layout_alignParentBottom="true"
             android:background="@color/div_white" />
-
     </RelativeLayout>
-
 
     <RadioGroup
         android:id="@+id/rg_tab_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/bg_white"
-        android:orientation="horizontal">
+        android:background="@color/color_bottom_bar_bg"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="3dp">
 
         <RadioButton
             android:id="@+id/rb_found"
@@ -44,28 +61,28 @@
             android:text="@string/tab_menu_found" />
 
         <RadioButton
-            android:id="@+id/rb_message"
+            android:id="@+id/rb_video"
             style="@style/tab_menu_item_bottom"
-            android:drawableTop="@drawable/tab_menu_message"
-            android:text="@string/tab_menu_profile" />
+            android:drawableTop="@drawable/tab_menu_video"
+            android:text="@string/tab_menu_video" />
 
         <RadioButton
             android:id="@+id/rb_music"
             style="@style/tab_menu_item_bottom"
             android:drawableTop="@drawable/tab_menu_albums"
-            android:text="@string/tab_menu_my" />
+            android:text="@string/tab_menu_albums" />
 
         <RadioButton
-            android:id="@+id/rb_better"
+            android:id="@+id/rb_yuncun"
             style="@style/tab_menu_item_bottom"
-            android:drawableTop="@drawable/tab_menu_better"
-            android:text="@string/tab_menu_my" />
+            android:drawableTop="@drawable/tab_menu_yuncun"
+            android:text="@string/tab_menu_yuncun" />
 
         <RadioButton
-            android:id="@+id/rb_setting"
+            android:id="@+id/rb_account"
             style="@style/tab_menu_item_bottom"
-            android:drawableTop="@drawable/tab_menu_setting"
-            android:text="@string/tab_menu_setting" />
+            android:drawableTop="@drawable/tab_menu_account"
+            android:text="@string/tab_menu_account" />
 
     </RadioGroup>
 
@@ -85,3 +102,4 @@
 
 
 </RelativeLayout>
+

@@ -33,4 +33,6 @@
     <string name="popUpWindow_play_mode_name">playMode</string>
     <string name="pup_play_close_text_view">Close</string>
     <string name="search_music">Search Music</string>
+    <string name="tab_menu_yuncun">云村</string>
+    <string name="my_music">我的音乐</string>
 </resources>

@@ -33,7 +33,8 @@
     <string name="getSongImageAndLrc">获取封面和歌词</string>
     <string name="popUpWindow_play_mode_name">循环模式</string>
     <string name="pup_play_close_text_view">关闭</string>
-    <string name="search_music">添加歌曲</string>
+    <string name="tab_menu_yuncun">云村</string>
+    <string name="my_music">我的音乐</string>
 
 
 </resources>

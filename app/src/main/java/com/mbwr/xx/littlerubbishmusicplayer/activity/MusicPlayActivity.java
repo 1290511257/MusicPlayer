@@ -75,22 +75,14 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                     String singer = msg.getData().getString("singer");
                     int songTime = msg.getData().getInt("duration");
                     int timePlayed = msg.getData().getInt("currentPosition");
-                    if (mSongName == null || mSingerName == null || mProgress == null || mTimePlayed == null || mDuration == null)
+                    if (mSongName == null || mSingerName == null || mProgress == null || mTimePlayed == null || mDuration == null||mPlayModeImage == null)
                         break;
+
                     mSongName.setText(songName);
                     mSingerName.setText(singer);
                     mTimePlayed.setText(TimeUtils.convertIntTime2String(timePlayed));
                     mDuration.setText(TimeUtils.convertIntTime2String(songTime));
                     mProgress.setMax(songTime);
-                    break;
-                case 1:
-                    if (mProgress == null || mTimePlayed == null) break;
-                    int playedTime = msg.getData().getInt("currentPosition");
-                    mProgress.setProgress(playedTime);
-                    mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
-                    break;
-                case 2:
-                    if (mPlayModeImage == null) break;
                     mPlayMode = msg.getData().getInt("playMode") - 1;
                     isPlaying = msg.getData().getBoolean("playStatu");
                     switch (mPlayMode) {
@@ -110,6 +102,14 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
                         mControl.setImageResource(R.drawable.play_rdi_btn_pause);
                     }
                     updatePupPlayModeInfo();
+                    break;
+                case 1:
+                    if (mProgress == null || mTimePlayed == null) break;
+                    int playedTime = msg.getData().getInt("currentPosition");
+                    mProgress.setProgress(playedTime);
+                    mTimePlayed.setText(TimeUtils.convertIntTime2String(playedTime));
+                    break;
+                case 2:
                     break;
             }
         }
@@ -211,6 +211,8 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     protected void onPostResume() {
         Log.i(TAG, "onPostResume");
         musicPlayerManager = MusicPlayerManager.getInstance();
+        Intent intent = new Intent(MusicPlayerManager.UPDATE_MUSIC_INFO);
+        Utils.getContext().sendBroadcast(intent);
         super.onPostResume();
     }
 
@@ -223,6 +225,9 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy");
+
+        Intent intent = new Intent(MusicPlayerManager.UPDATE_MUSIC_INFO);
+        Utils.getContext().sendBroadcast(intent);
         //解绑服务
         unbindService(connection);
         super.onDestroy();
@@ -237,7 +242,8 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.out_local_album:
-                finish();
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
                 break;
             case R.id.playing_mode:
                 playModeChange();
@@ -289,15 +295,15 @@ public class MusicPlayActivity extends BaseActivity implements View.OnClickListe
         if (mPopPlayModeImage == null || mPopPlayModeText == null) return;
         switch (mPlayMode) {
             case 0:
-                mPopPlayModeImage.setImageResource(R.mipmap.xunhuan);
+                mPopPlayModeImage.setImageResource(R.drawable.cm6_playlist_icn_loop3x);
                 mPopPlayModeText.setText("顺序播放");
                 break;
             case 1:
-                mPopPlayModeImage.setImageResource(R.mipmap.radommusic);
+                mPopPlayModeImage.setImageResource(R.drawable.cm6_playlist_icn_shuffle3x);
                 mPopPlayModeText.setText("随机播放");
                 break;
             case 2:
-                mPopPlayModeImage.setImageResource(R.mipmap.onemusic);
+                mPopPlayModeImage.setImageResource(R.drawable.cm6_playlist_icn_one3x);
                 mPopPlayModeText.setText("单曲循环");
                 break;
         }

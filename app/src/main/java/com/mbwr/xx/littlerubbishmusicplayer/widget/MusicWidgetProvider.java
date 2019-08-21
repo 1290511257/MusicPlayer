@@ -35,19 +35,47 @@ public class MusicWidgetProvider extends AppWidgetProvider {
     private static int mProgressMax, playMode;
     ComponentName componentName;
     AppWidgetManager appWidgetManager;
+    RemoteViews remoteViews;
 
     @Override
     public void onEnabled(Context context) {
         Log.e(TAG, "onEnabled");
-//        IntentFilter intentFilter = new IntentFilter();
-//        intentFilter.addAction(UPDATE_MUSIC_INFO);
-//        intentFilter.addAction(UPDATE_MODE_STATUS);
-//        intentFilter.addAction(UPDATE_PROGRESS);
-//        Utils.getContext().registerReceiver(this, intentFilter);
-
+        remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         super.onEnabled(context);
     }
 
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        Log.e(TAG, "onDisabled");
+    }
+
+
+    public MusicWidgetProvider() {
+        super();
+//        Log.e(TAG, "MusicWidgetProvider");
+    }
+
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+        Log.e(TAG, "onAppWidgetOptionsChanged");
+    }
+
+
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        super.onDeleted(context, appWidgetIds);
+        Log.e(TAG, "onDeleted");
+    }
+
+
+    @Override
+    public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
+        super.onRestored(context, oldWidgetIds, newWidgetIds);
+        Log.e(TAG, "onRestored");
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -86,7 +114,6 @@ public class MusicWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         String action = intent.getAction();
         Log.e(TAG, action);
 //        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -100,7 +127,7 @@ public class MusicWidgetProvider extends AppWidgetProvider {
                 updateMusicInfo(context, intent);
                 break;
             case UPDATE_MODE_STATUS:
-                updateModeAndStatus(context, intent);
+//                updateModeAndStatus(context, intent);
                 break;
             case UPDATE_PROGRESS:
                 updateProgress(context, intent);
@@ -119,7 +146,9 @@ public class MusicWidgetProvider extends AppWidgetProvider {
      */
     private void resetWidget(Context context) {
         Log.i(TAG, "resetWidget");
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        if (null == remoteViews) {
+            remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        }
         remoteViews.setTextViewText(R.id.song_name, "");
         remoteViews.setTextViewText(R.id.singer_name, "");
         remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(0));
@@ -135,11 +164,13 @@ public class MusicWidgetProvider extends AppWidgetProvider {
      * @describe 更新播放进度条
      */
     private void updateProgress(Context context, Intent intent) {
-
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        if (null == remoteViews) {
+            remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        }
         Bundle bd = intent.getExtras();
         int mProgress = bd.getInt("currentPosition");
-
+//        remoteViews.setTextViewText(R.id.song_name, bd.getString("songName"));
+//        remoteViews.setTextViewText(R.id.singer_name, bd.getString("singer"));
         remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
         remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
         refreshWidget(context, remoteViews);
@@ -151,34 +182,13 @@ public class MusicWidgetProvider extends AppWidgetProvider {
      * @describe 更新播放音乐信息
      */
     private void updateMusicInfo(Context context, Intent intent) {
+        if (null == remoteViews) {
+            remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
+        }
 
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
         Bundle bd = intent.getExtras();
         mProgressMax = bd.getInt("duration");
         int mProgress = bd.getInt("currentPosition");
-
-        remoteViews.setTextViewText(R.id.song_name, bd.getString("songName"));
-        remoteViews.setTextViewText(R.id.singer_name, bd.getString("singer"));
-        remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
-        remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
-        remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
-//
-//        Log.e(TAG, "#########更新MusicInfo\n" +
-//                "songName = " + bd.getString("songName") +
-//                "\nsinger = " + bd.getString("singer"));
-        refreshWidget(context, remoteViews);
-    }
-
-    /**
-     * @author xuxiong
-     * @time 7/29/19  1:19 AM
-     * @describe 更新播放模式和播放状态
-     */
-    private void updateModeAndStatus(Context context, Intent intent) {
-//        Log.d(TAG, "onReceive-------UPDATE_MODE_STATUS");
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_musicplay);
-        Bundle bd = intent.getExtras();
-
         playMode = bd.getInt("playMode");
         boolean isPlaying = bd.getBoolean("playStatu");
         switch (playMode) {//1顺序循环 2随机循环 3单曲循环
@@ -192,14 +202,23 @@ public class MusicWidgetProvider extends AppWidgetProvider {
                 remoteViews.setImageViewResource(R.id.widget_play_mode, R.drawable.play_icn_one);
                 break;
         }
-
         if (isPlaying) {
             remoteViews.setImageViewResource(R.id.widget_play, R.drawable.widget_play_selector);
         } else {
             remoteViews.setImageViewResource(R.id.widget_play, R.drawable.widget_pause_selector);
         }
+        remoteViews.setTextViewText(R.id.song_name, bd.getString("songName"));
+        remoteViews.setTextViewText(R.id.singer_name, bd.getString("singer"));
+        remoteViews.setTextViewText(R.id.widget_duration_played, TimeUtils.convertIntTime2String(mProgress));
+        remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
+        remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
+//
+//        Log.e(TAG, "#########更新MusicInfo\n" +
+//                "songName = " + bd.getString("songName") +
+//                "\nsinger = " + bd.getString("singer"));
         refreshWidget(context, remoteViews);
     }
+
 
     /**
      * @author xuxiong
@@ -222,4 +241,6 @@ public class MusicWidgetProvider extends AppWidgetProvider {
         componentName = new ComponentName(context, MusicWidgetProvider.class);
         appWidgetManager.updateAppWidget(componentName, remoteViews);
     }
+
+
 }

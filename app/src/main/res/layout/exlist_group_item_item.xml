@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="40dp"
     android:orientation="horizontal"
     android:background="@color/colorWhite">
 
     <ImageView
         android:id="@+id/album_img_icon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:focusable="false"
-        android:padding="10dp"
-        android:src="@mipmap/recommend_single"/>
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:padding="1dp"
+        android:src="@drawable/lay_icn_alb"/>
 
     <TextView
         android:id="@+id/album_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_height="match_parent"
+        android:layout_weight="20"
+        android:gravity="center_vertical"
         android:maxLines="1"
-        android:paddingBottom="3dp"
         android:paddingEnd="3dp"
-        android:textSize="23sp" />
-
+        android:textSize="15sp" />
+    <ImageView
+        android:id="@+id/album_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:padding="7dp"
+        android:src="@drawable/cm6_playlist_icn_delete3x"/>
 </LinearLayout>

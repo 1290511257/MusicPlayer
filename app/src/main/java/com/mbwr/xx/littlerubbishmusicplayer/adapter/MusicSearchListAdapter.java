@@ -73,10 +73,8 @@ public class MusicSearchListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public class ViewHolder {
-
+    public static class ViewHolder {
         public CheckBox vCheckBox;
         TextView vSongName;
-
     }
 }

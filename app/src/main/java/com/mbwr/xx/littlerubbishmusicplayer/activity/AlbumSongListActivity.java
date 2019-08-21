@@ -1,6 +1,5 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AlbumSongListActivity extends Activity {
+public class AlbumSongListActivity extends BaseActivity {
 
     private static final String TAG = AlbumSongListActivity.class.getSimpleName();
     private CommonAdapter<Song> mAdapter;
@@ -63,40 +62,18 @@ public class AlbumSongListActivity extends Activity {
 
     private ImageButton mChoiceAll;
     Button mPopCloseBottom;
-    private TextView mCloseTools;
+    private TextView mCloseTools, mHeadText;
     //用来处理点击事件的linearlayout
     private LinearLayout mMultiplySelectBottom, mChoiceAllOutLayout, mMultiplyAdd2PlayList, mMultiplyAdd2Album, mMultiplyDelete;
     //用来控制显示隐藏的linearlayout
     private LinearLayout mLinearLayoutAbove, mLinearLayoutBelow;
 
-    /**
-     * Called when the activity is starting.  This is where most initialization
-     * should go: calling {@link #setContentView(int)} to inflate the
-     * activity's UI, using {@link #findViewById} to programmatically interact
-     * with widgets in the UI, calling
-     * {@link #managedQuery} to retrieve
-     * cursors for data being displayed, etc.
-     *
-     * <p>You can call {@link #finish} from within this function, in
-     * which case onDestroy() will be immediately called after {@link #onCreate} without any of the
-     * rest of the activity lifecycle ({@link #onStart}, {@link #onResume}, {@link #onPause}, etc)
-     * executing.
-     *
-     * <p><em>Derived classes must call through to the super class's
-     * implementation of this method.  If they do not, an exception will be
-     * thrown.</em></p>
-     *
-     * @param savedInstanceState If the activity is being re-initialized after
-     *                           previously being shut down then this Bundle contains the data it most
-     *                           recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
-     * @see #onStart
-     * @see #onSaveInstanceState
-     * @see #onRestoreInstanceState
-     * @see #onPostCreate
-     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG,"onCreate");
+
         setContentView(R.layout.activity_music_list);
         musicApp = (MusicApp) this.getApplication();
 
@@ -104,6 +81,8 @@ public class AlbumSongListActivity extends Activity {
         Bundle bd = aIntent.getBundleExtra("MainActivityOld");
         albumId = bd.getInt("album");
         mAlbumSongs = DaoOperator.getSongsByAlbumId(albumId);
+        mHeadText = findViewById(R.id.head_local);
+        mHeadText.setText(LitePal.find(Album.class, albumId).getName());
 
         setAllSelectFalse();
 
@@ -120,7 +99,7 @@ public class AlbumSongListActivity extends Activity {
         mRecyclerView = findViewById(R.id.song_list_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 //        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));//栅格布局,每行显示x个item
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mAdapter = new CommonAdapter<Song>(this, R.layout.recyclerview_song_list_item, mAlbumSongs) {
             @Override
             protected void convert(ViewHolder holder, Song song, int position) {
@@ -368,7 +347,7 @@ public class AlbumSongListActivity extends Activity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
-                }, android.R.drawable.ic_dialog_alert).show();
+                }, android.R.drawable.ic_delete).show();
     }
 
     /**
@@ -461,7 +440,7 @@ public class AlbumSongListActivity extends Activity {
         layoutParams.alpha = 0.8f;//设置背景透明度
         getWindow().setAttributes(layoutParams);
         //设置点击外部消失
-        popupWindow.setOutsideTouchable(true);
+        popupWindow.setOutsideTouchable(false);
         //窗口消失事件
         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override

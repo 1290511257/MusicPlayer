@@ -1,90 +1,125 @@
 package com.mbwr.xx.littlerubbishmusicplayer.activity;
 
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.adapter.MusicFragmentPagerAdapter;
+import com.mbwr.xx.littlerubbishmusicplayer.utils.Utils;
 
-
-/**
- * Created by Coder-pig on 2015/8/28 0028.
- */
-public class MainActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener,
+public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener,
         ViewPager.OnPageChangeListener {
 
-    //UI Objects
-    private TextView txt_topbar;
-    private RadioGroup rg_tab_bar;
-    private RadioButton rb_found,rb_music;
-    private RadioButton rb_message;
-    private RadioButton rb_better;
-    private RadioButton rb_setting;
-    private ViewPager vpager;
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-    private MyFragmentPagerAdapter mAdapter;
+    private ImageView mMusicStatus;
+    private TextView mTopText;
+    private RadioGroup mRGToolBar;
+    private RadioButton mRBFound, mRBMusic, mRBVideo, mRBYuncun, mRBAccount;
+    private ViewPager mViewPager;
+
+    private MusicFragmentPagerAdapter mAdapter;
 
     //几个代表页面的常量
     public static final int PAGE_ONE = 0;
     public static final int PAGE_TWO = 1;
     public static final int PAGE_THREE = 2;
     public static final int PAGE_FOUR = 3;
+    public static final int PAGE_FIVE = 4;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_fragment);
-        mAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
+        mAdapter = new MusicFragmentPagerAdapter(getSupportFragmentManager());
         bindViews();
-        rb_found.setChecked(true);
+        mRBMusic.setChecked(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.e(TAG, "onDestroy");
+        super.onDestroy();
     }
 
     private void bindViews() {
-        txt_topbar = findViewById(R.id.txt_topbar);
-        rg_tab_bar = findViewById(R.id.rg_tab_bar);
-        rb_found = findViewById(R.id.rb_found);
-        rb_message = findViewById(R.id.rb_message);
-        rb_better = findViewById(R.id.rb_better);
-        rb_setting = findViewById(R.id.rb_setting);
-        rb_music = findViewById(R.id.rb_music);
+        //top
+
+        mTopText = findViewById(R.id.txt_top_bar);
+        mMusicStatus = findViewById(R.id.top_bar_image2);
+
+
+        mMusicStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent musicPlayIntent = new Intent(Utils.getContext(), MusicPlayActivity.class);
+                startActivity(musicPlayIntent);
+            }
+        });
+
+
+        //bottom
+        mRGToolBar = findViewById(R.id.rg_tab_bar);
+        mRBFound = findViewById(R.id.rb_found);
+        mRBVideo = findViewById(R.id.rb_video);
+        mRBYuncun = findViewById(R.id.rb_yuncun);
+        mRBAccount = findViewById(R.id.rb_account);
+        mRBMusic = findViewById(R.id.rb_music);
+
 
         //定义底部图片大小
-        Drawable drawableFound = getResources().getDrawable(R.drawable.tab_menu_found);
-        drawableFound.setBounds(0, 0, 69, 69);//第一0是距左右边距离，第二0是距上下边距离，第三69长度,第四宽度
-        rb_found.setCompoundDrawables(null, drawableFound, null, null);//只放上面
+//        Drawable drawableFound = getResources().getDrawable(R.drawable.tab_menu_found);
+//        drawableFound.setBounds(0, 0, 69, 69);//第一是距左右边距离，第二是距上下边距离，第三图片长度,第四宽度
+//        mRBFound.setCompoundDrawables(null, drawableFound, null, null);//只放上面
+//
+//        Drawable drawableVideo = getResources().getDrawable(R.drawable.tab_menu_video);
+//        drawableVideo.setBounds(0, 0, 69, 69);
+//        mRBVideo.setCompoundDrawables(null, drawableVideo, null, null);
+//
+//        Drawable drawableMusic = getResources().getDrawable(R.drawable.tab_menu_albums);
+//        drawableMusic.setBounds(0, 0, 69, 69);
+//        mRBMusic.setCompoundDrawables(null, drawableMusic, null, null);
+//
+//        Drawable drawableYuncun = getResources().getDrawable(R.drawable.tab_menu_yuncun);
+//        drawableYuncun.setBounds(0, 0, 69, 69);
+//        mRBYuncun.setCompoundDrawables(null, drawableYuncun, null, null);
+//
+//        Drawable drawableAccount = getResources().getDrawable(R.drawable.tab_menu_account);
+//        drawableAccount.setBounds(0, 0, 69, 69);
+//        mRBAccount.setCompoundDrawables(null, drawableAccount, null, null);
 
-        Drawable drawableMusic = getResources().getDrawable(R.drawable.tab_menu_albums);
-        drawableMusic.setBounds(0, 0, 69, 69);//第一0是距左右边距离，第二0是距上下边距离，第三69长度,第四宽度
-        rb_music.setCompoundDrawables(null, drawableMusic, null, null);//只放上面
-
-
-        rg_tab_bar.setOnCheckedChangeListener(this);
-
-        vpager = findViewById(R.id.view_pager);
-        vpager.setAdapter(mAdapter);
-        vpager.setCurrentItem(0);
-        vpager.addOnPageChangeListener(this);
+        mRGToolBar.setOnCheckedChangeListener(this);
+        mViewPager = findViewById(R.id.view_pager);
+        mViewPager.setAdapter(mAdapter);
+        mViewPager.setCurrentItem(2);
+        mViewPager.addOnPageChangeListener(this);
     }
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         switch (checkedId) {
             case R.id.rb_found:
-                vpager.setCurrentItem(PAGE_ONE);
+                mViewPager.setCurrentItem(PAGE_ONE);
                 break;
-            case R.id.rb_message:
-                vpager.setCurrentItem(PAGE_TWO);
+            case R.id.rb_video:
+                mViewPager.setCurrentItem(PAGE_TWO);
                 break;
-            case R.id.rb_better:
-                vpager.setCurrentItem(PAGE_THREE);
+            case R.id.rb_music:
+                mViewPager.setCurrentItem(PAGE_THREE);
                 break;
-            case R.id.rb_setting:
-                vpager.setCurrentItem(PAGE_FOUR);
+            case R.id.rb_yuncun:
+                mViewPager.setCurrentItem(PAGE_FOUR);
+                break;
+            case R.id.rb_account:
+                mViewPager.setCurrentItem(PAGE_FIVE);
                 break;
         }
     }
@@ -93,30 +128,57 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     //重写ViewPager页面切换的处理方法
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+//        Log.i(TAG, "-----onPageScrolled------\n" +
+//                "position = " + position + "; positionOffset = " + positionOffset + "; positionOffsetPixels = " + positionOffsetPixels);
     }
 
+    /**
+     * @author xuxiong
+     * @time 8/19/19  4:19 AM
+     * @describe 处理页面切换逻辑
+     */
     @Override
     public void onPageSelected(int position) {
+        Log.i(TAG, "-----onPageSelected-----\n" +
+                "position = " + position);
+        switch (position) {
+            case 0:
+                mTopText.setText(R.string.search_music);
+                break;
+            case 1:
+                break;
+            case 2:
+                mTopText.setText(R.string.my_music);
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+        }
 
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
+        Log.i(TAG, "-----onPageScrollStateChanged-----\n" +
+                "state = " + state);
         //state的状态有三个，0表示什么都没做，1正在滑动，2滑动完毕
         if (state == 2) {
-            switch (vpager.getCurrentItem()) {
+            switch (mViewPager.getCurrentItem()) {
                 case PAGE_ONE:
-                    rb_found.setChecked(true);
+                    mRBFound.setChecked(true);
                     break;
                 case PAGE_TWO:
-                    rb_message.setChecked(true);
+                    mRBVideo.setChecked(true);
                     break;
                 case PAGE_THREE:
-                    rb_better.setChecked(true);
+                    mRBMusic.setChecked(true);
                     break;
                 case PAGE_FOUR:
-                    rb_setting.setChecked(true);
+                    mRBYuncun.setChecked(true);
+                    break;
+                case PAGE_FIVE:
+                    mRBAccount.setChecked(true);
                     break;
             }
         }

@@ -34,14 +34,19 @@
     <string name="popUpWindow_play_mode_name">playMode</string>
     <string name="pup_play_close_text_view">Close</string>
     <string name="title_activity_main2">Main2Activity</string>
-    <string name="search_music">添加歌曲</string>
+    <string name="search_music">歌曲搜索</string>
+
 
     <!--############-->
     <string name="hello_world">Hello world!</string>
     <string name="tab_menu_alert">提醒</string>
     <string name="tab_menu_found">发现</string>
-    <string name="tab_menu_profile">信息</string>
-    <string name="tab_menu_my">我的</string>
-    <string name="tab_menu_setting">设置</string>
+
+    <string name="tab_menu_video">视频</string>
+    <string name="tab_menu_albums">我的</string>
+    <string name="tab_menu_account">帐号</string>
+    <string name="tab_menu_yuncun">云村</string>
+    <string name="my_music">我的音乐</string>
+
 
 </resources>

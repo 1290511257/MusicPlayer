@@ -28,7 +28,7 @@
     <dimen name="widget_paddingTextView_height">10dp</dimen>
 
     <!--playActivity layout settings-->
-    <dimen name="musicPlay_activity_outLocal_imageView_width">40dp</dimen>
+    <dimen name="musicPlay_activity_outLocal_imageView_width">25dp</dimen>
     <dimen name="musicPlay_activity_headerView_frameLayout_height">390dp</dimen>
     <dimen name="musicPlay_activity_bottom_control_marginBottom">15dp</dimen>
     <dimen name="musicPlay_activity_musicTool_marginLeft">70dp</dimen>
@@ -44,6 +44,11 @@
     <dimen name="musicPlay_activity_needle_imageView_marginRight">125dp</dimen>
     <dimen name="musicPlay_activity_volume_layout_marginTop">22dp</dimen>
     <dimen name="musicPlay_activity_music_duration_textSize">10sp</dimen>
+
+    <!-- ViewPager+fragment  MainActivity-->
+    <dimen name="bottom_nav_width">69px</dimen>
+    <dimen name="bottom_nav_marginLR">0dp</dimen>
+    <dimen name="bottom_nav_marginTD">0dp</dimen>
 
 
 </resources>

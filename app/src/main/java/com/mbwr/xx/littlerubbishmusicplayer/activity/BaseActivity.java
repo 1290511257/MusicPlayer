@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.mbwr.xx.littlerubbishmusicplayer.utils.LanguageContextWrapper;
 
-import org.litepal.LitePalApplication;
 
 import java.util.Locale;
 

@@ -104,7 +104,7 @@ public class PlayListAdapter extends BaseAdapter implements View.OnClickListener
         mycallback.onClick(v);
     }
 
-    public class ViewHolder {
+    public static class ViewHolder {
         ImageView playing, delete;
         TextView playname;
     }
