@@ -49,10 +49,10 @@ public class MusicSearchFragment extends Fragment implements View.OnClickListene
     private int addSongSize = 0;
 
     //可新增音乐
-    private List<Song> mCanAddSongList = new ArrayList<>();
+    private List<Song> mCanAddSongList;
 
     //所有已近添加过的音乐
-    private static List<Song> mAddedSongList = new ArrayList<>();
+    private static List<Song> mAddedSongList;
 
     Handler handler = new Handler() {
         @Override
@@ -91,6 +91,8 @@ public class MusicSearchFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_local_music_search, container, false);
+
+        mCanAddSongList = new ArrayList<>();
 
         musicApp = (MusicApp) MusicApp.getContext();
         mSearching = view.findViewById(R.id.seaching);//

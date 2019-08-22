@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mbwr.xx.littlerubbishmusicplayer">
-    <!-- 写文件权限 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 读文件权限 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 电话监听权限 -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /><!-- 写文件权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 读文件权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /><!-- 电话监听权限 -->
+
+    <!--蓝牙权限-->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+
+    <!--位置权限-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
 
     <application
         android:name=".MusicApp"
@@ -18,10 +27,11 @@
             android:name=".activity.MusicSearchActivity"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.MainActivity"
+        <activity
+            android:name=".activity.MainActivity"
+            android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:launchMode="singleInstance"/>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".activity.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -38,8 +48,9 @@
             android:alwaysRetainTaskState="true"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".activity.AlbumSongListActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
+            android:name=".activity.AlbumSongListActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service android:name=".service.PhoneListenerService">
             <intent-filter>
@@ -52,7 +63,7 @@
         <receiver android:name=".widget.MusicWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO"/>
+                <action android:name="com.mbwr.xx.com.mbwr.xx.littlerubbishmusicplayer.UPDATE_MUSIC_INFO" />
             </intent-filter>
 
             <meta-data
