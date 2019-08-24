@@ -38,7 +38,22 @@
     <dimen name="musicPlay_activity_volume_layout_marginTop">22dp</dimen>
     <dimen name="musicPlay_activity_music_duration_textSize">10sp</dimen>
 
-    <!-- ViewPager+fragment  MainActivity-->
+    <!-- ViewPager+fragment  BluetoothMainActivity-->
+
+
+
+    <!-- Define standard dimensions to comply with Holo-style grids and rhythm. -->
+
+    <dimen name="margin_tiny">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">32dp</dimen>
+    <dimen name="margin_huge">64dp</dimen>
+
+    <!-- Semantic definitions -->
+
+    <dimen name="horizontal_page_margin">@dimen/margin_medium</dimen>
+    <dimen name="vertical_page_margin">@dimen/margin_medium</dimen>
 
 
 </resources>

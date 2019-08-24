@@ -647,7 +647,7 @@ public class MusicPlayerManager extends Service {
             if (mAlbum != null && currentSong >= 0 && (songList.size() - currentSong) > 0) {
                 mediaPlayer.setDataSource(songList.get(currentSong).getFilePath());
                 mediaPlayer.prepare();//缓冲音乐
-//                Log.i(TAG, songList.get(currentSong).getName());
+//                MyLog.i(TAG, songList.get(currentSong).getName());
             }
         } catch (IOException e) {
             Log.e(TAG, e.toString());

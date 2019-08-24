@@ -385,7 +385,7 @@ public class MusicAlbumsFragment extends Fragment {
 //        InputMethodManager manager = ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE));
 
 //        if (manager.showSoftInput(view, InputMethodManager.SHOW_FORCED))
-//            Log.e("------->", "弹出软键盘失败!!");
+//            MyLog.e("------->", "弹出软键盘失败!!");
         showSoftInputFromWindow(activity, mAlbumEditText);
     }
 

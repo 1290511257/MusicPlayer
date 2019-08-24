@@ -53,7 +53,7 @@ public class MusicWidgetProvider extends AppWidgetProvider {
 
     public MusicWidgetProvider() {
         super();
-//        Log.e(TAG, "MusicWidgetProvider");
+//        MyLog.e(TAG, "MusicWidgetProvider");
     }
 
 
@@ -213,7 +213,7 @@ public class MusicWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.widget_duration_total, TimeUtils.convertIntTime2String(mProgressMax));
         remoteViews.setProgressBar(R.id.music_progress, mProgressMax, mProgress, false);
 //
-//        Log.e(TAG, "#########更新MusicInfo\n" +
+//        MyLog.e(TAG, "#########更新MusicInfo\n" +
 //                "songName = " + bd.getString("songName") +
 //                "\nsinger = " + bd.getString("singer"));
         refreshWidget(context, remoteViews);

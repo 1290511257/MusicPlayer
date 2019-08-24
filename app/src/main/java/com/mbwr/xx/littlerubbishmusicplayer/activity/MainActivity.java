@@ -128,7 +128,7 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
     //重写ViewPager页面切换的处理方法
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//        Log.i(TAG, "-----onPageScrolled------\n" +
+//        MyLog.i(TAG, "-----onPageScrolled------\n" +
 //                "position = " + position + "; positionOffset = " + positionOffset + "; positionOffsetPixels = " + positionOffsetPixels);
     }
 

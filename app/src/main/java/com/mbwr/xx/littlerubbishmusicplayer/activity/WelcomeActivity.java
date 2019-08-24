@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
+import com.mbwr.xx.littlerubbishmusicplayer.bluetooth.BluetoothMainActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -187,7 +188,7 @@ public class WelcomeActivity extends BaseActivity {
      * 应用初始化操作
      */
     private void init() {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), BluetoothMainActivity.class);
         startActivity(intent);
     }
 

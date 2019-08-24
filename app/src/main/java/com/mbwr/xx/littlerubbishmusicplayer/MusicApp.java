@@ -101,7 +101,7 @@ public class MusicApp extends LitePalApplication {
                         playInfo.put("songId", songId);
                         playInfo.put("playMode", playMode);
                     }
-//                    Log.i("AIDL", "拿到服务端数据:\n" +
+//                    MyLog.i("AIDL", "拿到服务端数据:\n" +
 //                            "albumId = " + albumId +
 //                            "\nsongId = " + songId +
 //                            "\nplayMode = " + playMode);
