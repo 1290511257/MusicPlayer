@@ -16,19 +16,37 @@
 
 package com.mbwr.xx.littlerubbishmusicplayer.bluetooth;
 
-/**
- * Defines several constants used between {@link BluetoothChatService} and the UI.
- */
 public interface Constants {
 
-    // Message types sent from the BluetoothChatService Handler
+    // Message types sent from the BluetoothService Handler
     int MESSAGE_STATE_CHANGE = 1;
     int MESSAGE_READ = 2;
     int MESSAGE_WRITE = 3;
     int MESSAGE_DEVICE_NAME = 4;
     int MESSAGE_TOAST = 5;
 
-    // Key names received from the BluetoothChatService Handler
+    // 请求类型,长度需一致 3 字符
+    String MESSAGE_REQUEST_FILE_LIST = "006";
+    String MESSAGE_RESPONSE_FILE_LIST = "007";
+
+    String MESSAGE_REQUEST_DOWNLOAD_FILE = "008";//请求下载文件信息
+    String MESSAGE_RESPONSE_PRE_DOWNLOAD_FILE = "009";//回应文件信息
+
+    String MESSAGE_REQUEST_DOWNLOAD_FILE_BLOCK = "010";//请求下载文件块
+    String MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK = "011";//回应文件块请求
+
+
+    String MESSAGE_RESPONSE_OK = "200";
+    String MESSAGE_SOURCE_NOT_EXIST = "404";
+
+    //分割文件信息 数据大小
+    int BLOCK_SIZE = 65536;//64k one block
+    int INDEX_LENGTH = 4;//文件块索引所占字节 3: max 4096块,
+
+    //单次写入蓝牙数据流最大字节大小
+    int MAX_SIZE_WRITE_INPUT = 1024;
+
+    // Key names received from the BluetoothService Handler
     String DEVICE_NAME = "device_name";
     String TOAST = "toast";
 

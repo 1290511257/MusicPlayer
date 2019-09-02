@@ -45,9 +45,9 @@ import android.widget.Toast;
 
 import com.mbwr.xx.littlerubbishmusicplayer.R;
 
-public class BluetoothChatFragment extends Fragment {
+public class BluetoothFragment extends Fragment {
 
-    private static final String TAG = BluetoothChatFragment.class.getSimpleName();
+    private static final String TAG = BluetoothFragment.class.getSimpleName();
 
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
@@ -65,7 +65,7 @@ public class BluetoothChatFragment extends Fragment {
 
     private BluetoothAdapter mBluetoothAdapter = null;
 
-    private BluetoothChatService mChatService = null;
+    private BluetoothService mChatService = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,7 +107,7 @@ public class BluetoothChatFragment extends Fragment {
         super.onResume();
 
         if (mChatService != null) {
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+            if (mChatService.getState() == BluetoothService.STATE_NONE) {
                 mChatService.start();
             }
         }
@@ -153,7 +153,7 @@ public class BluetoothChatFragment extends Fragment {
             }
         });
 
-        mChatService = new BluetoothChatService(getActivity(), mHandler);
+        mChatService = new BluetoothService(getActivity(), mHandler);
 
         mOutStringBuffer = new StringBuffer("");
     }
@@ -168,7 +168,7 @@ public class BluetoothChatFragment extends Fragment {
     }
 
     private void sendMessage(String message) {
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+        if (mChatService.getState() != BluetoothService.STATE_CONNECTED) {
             Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -225,28 +225,18 @@ public class BluetoothChatFragment extends Fragment {
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
-                        case BluetoothChatService.STATE_CONNECTED:
+                        case BluetoothService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
                             mConversationArrayAdapter.clear();
                             break;
-                        case BluetoothChatService.STATE_CONNECTING:
+                        case BluetoothService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
                             break;
-                        case BluetoothChatService.STATE_LISTEN:
-                        case BluetoothChatService.STATE_NONE:
+                        case BluetoothService.STATE_LISTEN:
+                        case BluetoothService.STATE_NONE:
                             setStatus(R.string.title_not_connected);
                             break;
                     }
-                    break;
-                case Constants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    String writeMessage = new String(writeBuf);
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    break;
-                case Constants.MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -261,6 +251,16 @@ public class BluetoothChatFragment extends Fragment {
                         Toast.makeText(activity, msg.getData().getString(Constants.TOAST),
                                 Toast.LENGTH_SHORT).show();
                     }
+                    break;
+                case Constants.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    String writeMessage = new String(writeBuf);
+                    mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    break;
+                case Constants.MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
                     break;
             }
         }

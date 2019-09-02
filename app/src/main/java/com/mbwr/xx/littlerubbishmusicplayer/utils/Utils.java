@@ -1,5 +1,6 @@
 package com.mbwr.xx.littlerubbishmusicplayer.utils;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +14,7 @@ import com.mbwr.xx.littlerubbishmusicplayer.model.Album;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class Utils {
 
@@ -78,6 +80,32 @@ public class Utils {
             }
         }
         return sDebug;
+    }
+
+    /**
+     *  @author xuxiong
+     *  @time 8/25/19  10:18 PM
+     *  @describe 判断一个服务是否启动
+     */
+    public static boolean isServiceRunning(Context mContext, String className) {
+
+        boolean isRunning = false;
+        ActivityManager activityManager = (ActivityManager) mContext
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> serviceList = activityManager
+                .getRunningServices(30);
+
+        if (!(serviceList.size() > 0)) {
+            return false;
+        }
+
+        for (int i = 0; i < serviceList.size(); i++) {
+            if (serviceList.get(i).service.getClassName().equals(className) == true) {
+                isRunning = true;
+                break;
+            }
+        }
+        return isRunning;
     }
 
     public static void showToastShort(String showText) {

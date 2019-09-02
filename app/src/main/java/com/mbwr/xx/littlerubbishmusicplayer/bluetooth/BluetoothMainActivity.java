@@ -46,7 +46,7 @@ public class BluetoothMainActivity extends SampleActivityBase {
         Log.i(TAG, "onCreate");
         if (savedInstanceState == null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.sample_content_fragment, new BluetoothChatFragment());
+            transaction.replace(R.id.sample_content_fragment, new BluetoothFragment());
             transaction.commit();
         }
 

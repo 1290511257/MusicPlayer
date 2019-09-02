@@ -29,6 +29,7 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
+//        android.provider.Settings.Global.putInt();
         //Locale.getDefault().getLanguage() 获取系统本地语言
         super.attachBaseContext(LanguageContextWrapper.wrap(newBase, Locale.getDefault().getLanguage()));
         //super前调用context将无效
