@@ -226,7 +226,7 @@ public class BluetoothFragment extends Fragment {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            setStatus("title");
                             mConversationArrayAdapter.clear();
                             break;
                         case BluetoothService.STATE_CONNECTING:

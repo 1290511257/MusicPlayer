@@ -35,16 +35,32 @@ public interface Constants {
     String MESSAGE_REQUEST_DOWNLOAD_FILE_BLOCK = "010";//请求下载文件块
     String MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK = "011";//回应文件块请求
 
-
     String MESSAGE_RESPONSE_OK = "200";
     String MESSAGE_SOURCE_NOT_EXIST = "404";
+
+    String TEMP_ORDER = "999";
+
+
+    // 数据包结束标志符
+    String MASSAGE_END_INDEX = "END";
 
     //分割文件信息 数据大小
     int BLOCK_SIZE = 65536;//64k one block
     int INDEX_LENGTH = 4;//文件块索引所占字节 3: max 4096块,
 
+
     //单次写入蓝牙数据流最大字节大小
-    int MAX_SIZE_WRITE_INPUT = 1024;
+    int MAX_SIZE_WRITE_OUTPUT = 1024;
+
+    //单次读取数据最大值
+    int MAX_SIZE_READ_INPUT = 2048;
+
+    //单次读取休眠时长,单位:mm
+    int READ_DATE_SLEEP_TIME = 0;
+
+    //服务端单次传输限速,单位:byte eg: 65536:64k
+    int WRITE_MAX_SIZE = 0;
+
 
     // Key names received from the BluetoothService Handler
     String DEVICE_NAME = "device_name";

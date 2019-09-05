@@ -1,18 +1,28 @@
 package com.mbwr.xx.littlerubbishmusicplayer.utils;
 
-import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import com.mbwr.xx.littlerubbishmusicplayer.bluetooth.Constants;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class FileUtils {
+
+    private static final String TAG = FileUtils.class.getSimpleName();
+
+    public static final File parentFileDir = Utils.getContext().getExternalFilesDir(
+            Environment.DIRECTORY_MUSIC);
 
     /**
      * @param fileSize  文件总大小
@@ -73,16 +83,42 @@ public class FileUtils {
     /**
      * @author xuxiong
      * @time 8/27/19  12:56 AM
+     * @describe 给定父路径下创建指定大小空白文件
+     */
+    public static void createEmptyDownloadFile(String fileName, long length) {
+
+        File file = new File(parentFileDir, fileName + ".download");
+        RandomAccessFile randomAccessFile = null;
+        try {
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            randomAccessFile.setLength(length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (randomAccessFile != null)
+                try {
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 9/4/19  2:49 AM
      * @describe 根据字节数组创建文件
      */
-    public static void createFileWithByte(byte[] bytes, String fileName) {
-
-        File file = new File(Utils.getContext().getExternalFilesDir(
-                Environment.DIRECTORY_MUSIC), fileName);
-
+    public static void createFileWithBytes(String fileName, byte[] bytes) {
+        File file = new File(parentFileDir, fileName);
         FileOutputStream outputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
-
         try {
             if (file.exists()) {
                 file.delete();
@@ -114,11 +150,145 @@ public class FileUtils {
         }
     }
 
-//    public File getMusicStorageDir(Context context, String albumName) {
-//        File file = new File(context.getExternalFilesDir(
-//                Environment.DIRECTORY_MUSIC), albumName);
-//        return file;
-//    }
+    /**
+     * @author xuxiong
+     * @time 9/3/19  10:25 PM
+     * @describe 向指定文件位置写入数据
+     */
+    public static boolean writeDownloadFileDate(String fileName, int index, byte bytes[]) {
+        RandomAccessFile randomAccessFile = null;
+        FileChannel fileChannel = null;
+        FileLock fileLock = null;
+        try {
+            randomAccessFile = new RandomAccessFile(parentFileDir + "/" + fileName + ".download", "rws");
+            fileChannel = randomAccessFile.getChannel();
+            while (true) {
+                try {
+                    fileLock = fileChannel.lock();//得到文件锁,否则阻塞
+//                    Thread.sleep(1);
+                    break;
+                } catch (Exception e) {
+                    Log.e(TAG, "write::: some other thread is holding the file..." + fileName);
+                }
+            }
+            randomAccessFile.seek(index);
+            randomAccessFile.write(bytes);
+
+            return true;
+        } catch (FileNotFoundException fileE) {
+            Log.e(TAG, fileE.toString());
+            return false;
+        } catch (IOException ioE) {
+            Log.e(TAG, ioE.toString());
+            return false;
+        } finally {
+            try {
+                fileLock.release();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fileChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                randomAccessFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 9/4/19  1:28 AM
+     * @describe 创建用以保存文件下载信息的文件
+     */
+    public static void createInitDownloadInfo(String fileName, byte bytes[]) {
+        File file = new File(parentFileDir, fileName + ".pre");
+        FileOutputStream outputStream = null;
+        BufferedOutputStream bufferedOutputStream = null;
+        try {
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            outputStream = new FileOutputStream(file);
+            bufferedOutputStream = new BufferedOutputStream(outputStream);
+            bufferedOutputStream.write(bytes);
+            bufferedOutputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null)
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            if (bufferedOutputStream != null)
+                try {
+                    bufferedOutputStream.close();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 9/4/19  1:16 AM
+     * @describe 更新文件下载信息
+     */
+    public static void updateDownloadInfo(String fileName, int target, boolean hasWrite) {
+        RandomAccessFile randomAccessFile = null;
+        FileChannel fileChannel = null;
+        FileLock fileLock = null;
+        try {
+            randomAccessFile = new RandomAccessFile(parentFileDir + "/" + fileName + ".pre", "rws");
+            fileChannel = randomAccessFile.getChannel();
+
+            while (true) {
+                try {
+                    fileLock = fileChannel.lock();//得到文件锁,否则阻塞
+                    break;
+                } catch (Exception e) {
+                    Log.e(TAG, "write::: some other thread is holding the file..." + fileName);
+                }
+            }
+            target = target / Constants.BLOCK_SIZE;//第 target + 1 块数据
+            randomAccessFile.seek(9 * target + 4);
+            if (hasWrite) {
+                randomAccessFile.write(1);
+            } else {
+                randomAccessFile.write(0);
+            }
+        } catch (FileNotFoundException fileE) {
+            Log.e(TAG, fileE.toString());
+        } catch (IOException ioE) {
+            Log.e(TAG, ioE.toString());
+        } finally {
+            if (fileLock != null)
+                try {
+                    fileLock.release();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            if (fileChannel != null)
+                try {
+                    fileChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            if (randomAccessFile != null)
+                try {
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+    }
 
     /**
      * @param rootPath 文件夹路径
