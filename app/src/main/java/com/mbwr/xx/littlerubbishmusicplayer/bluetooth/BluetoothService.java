@@ -17,6 +17,7 @@ import com.mbwr.xx.littlerubbishmusicplayer.utils.FileUtils;
 
 import org.litepal.LitePal;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,8 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class BluetoothService {
 
@@ -60,7 +65,7 @@ public class BluetoothService {
     private FileListSend mFileListSend;
     private FileListReceive mFileListReceive;
     private FileResponseTask mFileSendThread;
-    private FileReceiveTask mFileReceiveThread;
+    private DownloadDateProcessThread mFileReceiveThread;
     private ExecutorService mFileExecutorService;
 
     private static Map<String, Thread> mDownloadDataDistribution = new HashMap<>();
@@ -397,15 +402,19 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectedThread");
             byte[] bufferHead = new byte[3];
             byte[] bufferSize = new byte[4];
             byte[] bufferContent = null;
             int contentSize;
-            int size = 0;
+            byte[] fileNameSize;
+            byte[] fileNameBytes;
+            String fileName;
+            byte[] filePathSize;
+            byte[] filePathBytes;
             while (mState == STATE_CONNECTED) {//读取数据
                 try {
-                    mmInStream.read(bufferHead, 0, 3);
+
+                    readDate(mmInStream, bufferHead, 0, 3);
                     Log.i(">>>", new String(bufferHead));
                     switch (new String(bufferHead)) {
                         //Request为接收到的请求,Response为请求的回应处理
@@ -424,7 +433,6 @@ public class BluetoothService {
                             Log.i(TAG, data);
                             break;
                         case Constants.MESSAGE_REQUEST_DOWNLOAD_FILE://服务端处理请求下载文件;008
-                            Log.i(TAG, "RUN MESSAGE_REQUEST_DOWNLOAD_FILE");
                             //预调试时无法使用
 //                            mmInStream.read(bufferSize, 0, bufferSize.length);
 //                            contentSize = DataConvertUtils.getInt(bufferSize, 0);
@@ -436,25 +444,29 @@ public class BluetoothService {
 
                             //>>>>>>test
                             String path = "/storage/emulated/0/Music/Taylor Swift - Gorgeous.mp3";
+                            String path1 = "/storage/emulated/0/Music/Taylor Swift - Look What You Made Me Do.mp3";
+                            String path2 = "/storage/emulated/0/Music/Taylor Swift - Sparks Fly.mp3";
                             if (null == mFileExecutorService)
                                 mFileExecutorService = Executors.newFixedThreadPool(20);
                             mFileExecutorService.submit(new FileResponseTask(path));
+                            mFileExecutorService.submit(new FileResponseTask(path1));
+                            mFileExecutorService.submit(new FileResponseTask(path2));
                             break;
                         case Constants.MESSAGE_RESPONSE_PRE_DOWNLOAD_FILE://客户端接收下载文件信息;009
-                            Log.i(TAG, "RUN MESSAGE_RESPONSE_PRE_DOWNLOAD_FILE");
-                            byte[] filePathSize = new byte[4];
-                            filePathSize = readDate(mmInStream, filePathSize, 0, filePathSize.length);
-                            byte[] filePathBytes = new byte[DataConvertUtils.getInt(filePathSize, 0)];
-                            filePathBytes = readDate(mmInStream, filePathBytes, 0, filePathBytes.length);
-                            byte[] fileLen = new byte[4];
-                            fileLen = readDate(mmInStream, fileLen, 0, 4);
+                            filePathSize = new byte[4];
+                            readDate(mmInStream, filePathSize, 0, filePathSize.length);
+                            filePathBytes = new byte[DataConvertUtils.getInt(filePathSize, 0)];
+                            readDate(mmInStream, filePathBytes, 0, filePathBytes.length);
 
-                            bufferSize = readDate(mmInStream, bufferSize, 0, bufferSize.length);
+                            byte[] fileLen = new byte[4];
+                            readDate(mmInStream, fileLen, 0, 4);
+
+                            readDate(mmInStream, bufferSize, 0, bufferSize.length);
                             contentSize = DataConvertUtils.getInt(bufferSize, 0);
                             bufferContent = new byte[contentSize];
-                            bufferContent = readDate(mmInStream, bufferContent, 0, contentSize);
+                            readDate(mmInStream, bufferContent, 0, contentSize);
                             String filePath = new String(filePathBytes);
-                            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+                            fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
                             //创建文件下载信息的文本文件
                             FileUtils.createInitDownloadInfo(fileName, bufferContent);
                             FileUtils.createEmptyDownloadFile(fileName, DataConvertUtils.getInt(fileLen, 0));
@@ -467,37 +479,52 @@ public class BluetoothService {
                             Log.i("==================", "接收到共: " + m + " 字节数据!剩余:" + mmInStream.available() + "字节未读取.");
                             break;
                         case Constants.MESSAGE_REQUEST_DOWNLOAD_FILE_BLOCK://处理文件数据下载请求
-                            Log.i(TAG, "RUN MESSAGE_REQUEST_DOWNLOAD_FILE_BLOCK");
-                            byte[] filePathSize1 = new byte[4];
-                            filePathSize1 = readDate(mmInStream, filePathSize1, 0, filePathSize1.length);
-                            byte[] filePathBytes1 = new byte[DataConvertUtils.getInt(filePathSize1, 0)];
-                            filePathBytes1 = readDate(mmInStream, filePathBytes1, 0, filePathBytes1.length);
-                            bufferSize = readDate(mmInStream, bufferSize, 0, bufferSize.length);
+                            filePathSize = new byte[4];
+                            readDate(mmInStream, filePathSize, 0, filePathSize.length);
+                            filePathBytes = new byte[DataConvertUtils.getInt(filePathSize, 0)];
+                            readDate(mmInStream, filePathBytes, 0, filePathBytes.length);
+                            readDate(mmInStream, bufferSize, 0, bufferSize.length);
                             contentSize = DataConvertUtils.getInt(bufferSize, 0);
                             bufferContent = new byte[contentSize];
-                            bufferContent = readDate(mmInStream, bufferContent, 0, contentSize);
+                            readDate(mmInStream, bufferContent, 0, contentSize);
                             if (null == mFileExecutorService)
                                 mFileExecutorService = Executors.newFixedThreadPool(20);
-                            mFileExecutorService.submit(new FileResponseTask(new String(filePathBytes1), bufferContent));
+                            mFileExecutorService.submit(new FileResponseTask(new String(filePathBytes), bufferContent));
                             break;
-                        case Constants.MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK://接收文件下载数据;011
-                            Log.i(TAG, "RUN MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK");
-                            byte[] fileNameSize = new byte[4];
-                            fileNameSize = readDate(mmInStream, fileNameSize, 0, fileNameSize.length);
-                            byte[] fileNameBytes = new byte[DataConvertUtils.getInt(fileNameSize, 0)];
-                            fileNameBytes = readDate(mmInStream, fileNameBytes, 0, fileNameBytes.length);
+                        case Constants.MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK://接收文件下载数据分发处理;011
+                            fileNameSize = new byte[4];
+                            readDate(mmInStream, fileNameSize, 0, fileNameSize.length);
+                            fileNameBytes = new byte[DataConvertUtils.getInt(fileNameSize, 0)];
+                            readDate(mmInStream, fileNameBytes, 0, fileNameBytes.length);
+                            fileName = new String(fileNameBytes);
                             //文件块索引
                             byte[] indexBytes = new byte[4];
-                            indexBytes = readDate(mmInStream, indexBytes, 0, 4);
-                            bufferSize = readDate(mmInStream, bufferSize, 0, bufferSize.length);
+                            readDate(mmInStream, indexBytes, 0, 4);
+
+                            readDate(mmInStream, bufferSize, 0, bufferSize.length);
                             contentSize = DataConvertUtils.getInt(bufferSize, 0);
                             //文件块内容
                             bufferContent = new byte[contentSize];
-                            bufferContent = readDate(mmInStream, bufferContent, 0, contentSize);
-                            if (null == mFileExecutorService)
-                                mFileExecutorService = Executors.newFixedThreadPool(20);
-                            mFileExecutorService.submit(new FileReceiveTask(new String(fileNameBytes), DataConvertUtils.getInt(indexBytes, 0), bufferContent));
-                            Log.i(TAG, "index" + DataConvertUtils.getInt(indexBytes, 0) + "接收到共:" + (3 + 4 + DataConvertUtils.getInt(fileNameSize, 0) + 4 + 4 + contentSize) + " 字节数据 !剩余:" + mmInStream.available() + " 字节未读取. ");
+                            readDate(mmInStream, bufferContent, 0, contentSize);
+                            if (mDownloadDataDistribution.containsKey(fileName)) {
+                                DownloadDateProcessThread receiveThread = (DownloadDateProcessThread) mDownloadDataDistribution.get(fileName);
+                                if (receiveThread.isAlive() && fileName.equals(receiveThread.fileName)) {
+                                    try {
+                                        receiveThread.blockingQueue.offer(receiveThread.new FileDate(DataConvertUtils.getInt(indexBytes, 0), bufferContent), 200, TimeUnit.SECONDS);//数据加入处理队列
+                                    } catch (InterruptedException e) {
+                                        Log.e(TAG, "加入队列失败");
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    DownloadDateProcessThread downloadDateProcessThread = new DownloadDateProcessThread(new String(fileNameBytes), DataConvertUtils.getInt(indexBytes, 0), bufferContent);
+                                    downloadDateProcessThread.start();
+                                    mDownloadDataDistribution.put(fileName, downloadDateProcessThread);
+                                }
+                            } else {
+                                DownloadDateProcessThread downloadDateProcessThread = new DownloadDateProcessThread(new String(fileNameBytes), DataConvertUtils.getInt(indexBytes, 0), bufferContent);
+                                downloadDateProcessThread.start();
+                                mDownloadDataDistribution.put(fileName, downloadDateProcessThread);
+                            }
                             break;
                         case Constants.TEMP_ORDER:
                             String pathm = "/storage/emulated/0/Music/Taylor Swift - Gorgeous.mp3";
@@ -506,6 +533,20 @@ public class BluetoothService {
                                 mFileExecutorService = Executors.newFixedThreadPool(20);
                             mFileExecutorService.submit(new FileRequestTask(pathm));
                             break;
+                        case Constants.FILE_DOWNLOAD_END:
+                            filePathSize = new byte[4];
+                            readDate(mmInStream, filePathSize);
+                            filePathBytes = new byte[DataConvertUtils.getInt(filePathSize, 0)];
+                            readDate(mmInStream, filePathBytes);
+                            filePath = new String(filePathBytes);
+                            FileDownloadedCheck fileDownloadedCheck = new FileDownloadedCheck(filePath);
+                            if ((boolean) fileDownloadedCheck.call()) {
+                                Log.i(TAG, "下载完成");
+                            } else {
+                                if (null == mFileExecutorService)
+                                    mFileExecutorService = Executors.newFixedThreadPool(20);
+                                mFileExecutorService.submit(new FileRequestTask(filePath));
+                            }
                         default:
 //                            size = mmInStream.available();
 //                            byte[] bytes1 = new byte[size];
@@ -528,6 +569,10 @@ public class BluetoothService {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
                     break;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
@@ -568,26 +613,103 @@ public class BluetoothService {
      * @time 8/25/19  10:52 PM
      * @describe 文件接收线程
      */
-    private class FileReceiveTask implements Runnable {
+    private class DownloadDateProcessThread extends Thread {
 
-        private byte[] bytes;//传输文件数据
-        private int index;
         private String fileName;
+        private BlockingQueue<FileDate> blockingQueue;
 
-        FileReceiveTask(String file, int index, byte[] bytes) {
+        DownloadDateProcessThread(String file, int index, byte[] bytes) {
             this.fileName = file;
-            this.index = index;
-            this.bytes = bytes;
+            this.blockingQueue = new LinkedBlockingQueue();
+            if (!this.blockingQueue.offer(new FileDate(index, bytes)))
+                this.blockingQueue.offer(new FileDate(index, bytes));//如果加入队列失败,则尝试再次加入
         }
 
         @Override
         public void run() {
+            while (true) {
+                FileDate fileDate = null;
+                try {
+                    fileDate = blockingQueue.take();//从队列中取数据,无数据则阻塞
+                    Log.i(TAG, ">>> 文件: " + fileName + "正在下载 当前进度:" + fileDate.index);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (null != fileDate) {
+                    if (FileUtils.writeDownloadFileDate(fileName, fileDate.index, fileDate.bytes))//写入传输数据文件
+                        FileUtils.updateDownloadInfo(fileName, fileDate.index, true);//更新下载信息
+                } else {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "文件块保存失败!");
+                        e.printStackTrace();
+                    }
+                }
+            }
 
-            if (FileUtils.writeDownloadFileDate(fileName, index, bytes))//写入传输数据文件
-                FileUtils.updateDownloadInfo(fileName, index, true);//更新下载信息
         }
 
+        class FileDate {
+            private int index;
+            private byte[] bytes;
 
+            public FileDate(int index, byte[] bytes) {
+                this.index = index;
+                this.bytes = bytes;
+            }
+        }
+    }
+
+    /**
+     * @author xuxiong
+     * @time 9/5/19  3:53 AM
+     * @describe 检查文件是否成功传完
+     */
+    private class FileDownloadedCheck extends Thread implements Callable {
+
+        private String fileName;
+        private RandomAccessFile randomAccessFile;
+        private boolean isDone = true;
+
+        FileDownloadedCheck(String filePath) {
+            this.fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+            ;
+        }
+
+        @Override
+        public void run() {//检查文件是否接收完成
+            try {
+                randomAccessFile = new RandomAccessFile(FileUtils.parentFileDir + "/" + fileName + ".pre", "r");
+                for (int i = 4; i < randomAccessFile.length(); i += 9) {
+                    randomAccessFile.seek(i);
+                    if (randomAccessFile.read() == 0) {
+                        isDone = false;
+                        break;
+                    }
+                }
+                randomAccessFile.close();
+                if (isDone) {
+                    File preFile = new File(FileUtils.parentFileDir + "/" + fileName + ".pre");
+                    if (preFile.exists() && preFile.isFile() && preFile.delete()) {
+                        File file = new File(FileUtils.parentFileDir + "/" + fileName + ".download");
+                        file.renameTo(new File(FileUtils.parentFileDir + "/" + fileName));
+                        Log.i(TAG, "下载信息删除成功!");
+                    } else {
+                        Log.i(TAG, preFile.getName() + "文件不存在或删除失败!");
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public Object call() throws Exception {
+            return isDone;
+        }
     }
 
     /**
@@ -617,7 +739,6 @@ public class BluetoothService {
             this.bytes = bytes;
         }
 
-
         public void run() {
             Log.i(TAG, "FileResponseTask");
             switch (operator) {
@@ -635,8 +756,6 @@ public class BluetoothService {
                                 bytes);
 
                         write(response);
-                        Log.i("=============", "pre file包共发送:" + response.length + " byte 数据");
-                        Log.i(TAG, "FileResponseTask write localFile pre info end....");
                     } else {
                         write(Constants.MESSAGE_SOURCE_NOT_EXIST.getBytes());
                     }
@@ -648,8 +767,6 @@ public class BluetoothService {
                         if (bytes[i] == 0) {//如果该块数据未下载
                             index = DataConvertUtils.getInt(bytes, i - 4);
                             blockSize = DataConvertUtils.getInt(bytes, i + 1);
-//                            Log.i(">>>>>>>>", "index = " + index);
-//                            Log.i(">>>>>>>>", "blockSize = " + blockSize);
                             byte[] data = new byte[blockSize];
                             try {
                                 randomAccessFile.seek(index);
@@ -666,17 +783,16 @@ public class BluetoothService {
                                     DataConvertUtils.getByteArray(index),
                                     DataConvertUtils.getByteArray(blockSize),
                                     data);
-                            for (int l1 = fileBlockResponse.length - 20; l1 < fileBlockResponse.length; l1++) {
-                                Log.e("MMMMMMMMMMMMM", "byte = " + fileBlockResponse[l1]);
-                            }
                             write(fileBlockResponse);
-//                            try {
-//                                Thread.sleep(5000);//线程休眠五秒
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
+
                         }
                     }
+                    //服务端传输完成
+                    byte[] fileDownloadOK = DataConvertUtils.byteArrayAdd(
+                            Constants.FILE_DOWNLOAD_END.getBytes(),
+                            DataConvertUtils.getByteArray(file.getPath().getBytes().length),
+                            file.getPath().getBytes());
+                    write(fileDownloadOK);
                     try {
                         randomAccessFile.close();
                     } catch (IOException e) {
@@ -786,6 +902,7 @@ public class BluetoothService {
             }
             index = 0;
         }
+
     }
 
     /**
@@ -797,41 +914,21 @@ public class BluetoothService {
      * @time 9/3/19  6:18 AM
      * @describe 该方法保证从流中读取指定大小数据, 未读取到指定数据将阻塞
      */
-    private byte[] readDate(InputStream inputStream, @Nullable byte b[], int off, int length) {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || length < 0 || length > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        } else if (length == 0) {
-            return b;
-        }
-        int mContentSize = b.length - length;
-        //单次读取最大字节数
-        int mMaxReadSize = Constants.MAX_SIZE_READ_INPUT;
+    private void readDate(InputStream inputStream, @Nullable byte b[], int off, int length) throws IOException, InterruptedException {
+        int readMaxCount;
+        int n = 0;
+        do {
+            readMaxCount = Constants.MAX_SIZE_READ_INPUT;
+            if (readMaxCount > (length - n))
+                readMaxCount = length - n;
+            int count = inputStream.read(b, off + n, readMaxCount);
+            if (count < 0)
+                throw new EOFException();
+            n += count;
+            //休眠时间,配合 mMaxReadSize 实现流量控制
+            Thread.sleep(Constants.READ_DATE_SLEEP_TIME);
+        } while (n < length);
 
-        while ((off < mContentSize)) {
-            if (mContentSize - off - mMaxReadSize > 0) {
-                try {
-                    mMaxReadSize = inputStream.read(b, off, mMaxReadSize);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    mMaxReadSize = inputStream.read(b, off, mContentSize - off);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            off += mMaxReadSize;
-            try {
-                //休眠时间,配合 mMaxReadSize 实现流量控制
-                Thread.sleep(Constants.READ_DATE_SLEEP_TIME);
-            } catch (InterruptedException e) {
-                Log.e(TAG, e.toString());
-            }
-        }
-        return b;
     }
 
     /**
@@ -841,8 +938,8 @@ public class BluetoothService {
      * @time 9/4/19  4:55 AM
      * @describe 从输入流中读取数据, 未读满数组将阻塞
      */
-    private byte[] readDate(InputStream inputStream, @Nullable byte b[]) {
-        return readDate(inputStream, b, 0, b.length);
+    private void readDate(InputStream inputStream, @Nullable byte b[]) throws IOException, InterruptedException {
+        readDate(inputStream, b, 0, b.length);
     }
 
 }

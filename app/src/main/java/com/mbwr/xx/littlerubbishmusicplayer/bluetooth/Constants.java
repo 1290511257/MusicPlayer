@@ -35,6 +35,9 @@ public interface Constants {
     String MESSAGE_REQUEST_DOWNLOAD_FILE_BLOCK = "010";//请求下载文件块
     String MESSAGE_RESPONSE_DOWNLOAD_FILE_BLOCK = "011";//回应文件块请求
 
+    String FILE_DOWNLOAD_END = "200";
+
+
     String MESSAGE_RESPONSE_OK = "200";
     String MESSAGE_SOURCE_NOT_EXIST = "404";
 
@@ -44,8 +47,12 @@ public interface Constants {
     // 数据包结束标志符
     String MASSAGE_END_INDEX = "END";
 
+
+
+
     //分割文件信息 数据大小
     int BLOCK_SIZE = 65536;//64k one block
+
     int INDEX_LENGTH = 4;//文件块索引所占字节 3: max 4096块,
 
 
